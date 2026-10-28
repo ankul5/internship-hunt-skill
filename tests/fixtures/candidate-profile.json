@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-19T12:00:00Z",
+  "identity": {
+    "full_name": "Alex Example",
+    "email": "alex.example@example.com",
+    "phone": "+1 555-0100",
+    "location": "Springfield, XX",
+    "links": {
+      "linkedin": "https://www.example.com/in/alex-example",
+      "github": "https://github.example.com/alex-example",
+      "portfolio": null,
+      "other": []
+    },
+    "work_authorization": {"status": "citizen", "countries": ["XX"], "needs_sponsorship": false}
+  },
+  "education": [
+    {
+      "institution": "Example State University",
+      "degree": "BSc",
+      "field": "Computer Science",
+      "start_date": "2024-09",
+      "end_date": "2028-05",
+      "gpa": null,
+      "coursework": ["Data Structures", "Intro to Robotics"],
+      "provenance": "resume"
+    }
+  ],
+  "experience": [
+    {
+      "organization": "Example Campus IT Help Desk",
+      "title": "Student Assistant",
+      "start_date": "2025-01",
+      "end_date": null,
+      "location": "Springfield, XX",
+      "highlights": ["Resolved walk-in and email support requests for students and staff."],
+      "provenance": "resume"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Line-following robot",
+      "description": "Course project building a small robot that follows a track.",
+      "technologies": ["Python"],
+      "url": null,
+      "highlights": [],
+      "provenance": "resume"
+    }
+  ],
+  "skills": [
+    {"name": "Python", "category": "language", "provenance": "resume"},
+    {"name": "Figma", "category": "design", "provenance": "inferred_unconfirmed"}
+  ],
+  "certifications": [],
+  "resume": {"source_path": "resumes/alex-example-resume.pdf", "parsed_at": "2026-10-19T12:00:00Z"},
+  "preferences": {
+    "target_roles": ["Software Engineering Intern", "Data Science Intern"],
+    "locations": ["Springfield, XX"],
+    "remote_types": ["hybrid", "remote"],
+    "earliest_start": "2027-05-15",
+    "latest_start": "2027-06-30",
+    "duration_weeks_min": 10,
+    "duration_weeks_max": 14,
+    "min_stipend_text": null,
+    "industries": ["robotics", "health"],
+    "excluded_companies": [],
+    "deal_breakers": ["unpaid"]
+  },
+  "provenance": {
+    "identity.full_name": "resume",
+    "identity.email": "resume",
+    "identity.work_authorization.status": "user_stated",
+    "preferences.target_roles": "user_stated",
+    "preferences.earliest_start": "user_stated"
+  },
+  "open_questions": ["Minimum acceptable stipend?", "Is Figma experience real? It was inferred from a project name."]
+}

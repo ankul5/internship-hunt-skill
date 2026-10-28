@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "updated_at": null,
+  "identity": {
+    "full_name": null,
+    "email": null,
+    "phone": null,
+    "location": null,
+    "links": {"linkedin": null, "github": null, "portfolio": null, "other": []},
+    "work_authorization": {"status": null, "countries": [], "needs_sponsorship": null}
+  },
+  "education": [],
+  "experience": [],
+  "projects": [],
+  "skills": [],
+  "certifications": [],
+  "resume": {"source_path": null, "parsed_at": null},
+  "preferences": {
+    "target_roles": [],
+    "locations": [],
+    "remote_types": [],
+    "earliest_start": null,
+    "latest_start": null,
+    "duration_weeks_min": null,
+    "duration_weeks_max": null,
+    "min_stipend_text": null,
+    "industries": [],
+    "excluded_companies": [],
+    "deal_breakers": []
+  },
+  "provenance": {},
+  "open_questions": []
+}

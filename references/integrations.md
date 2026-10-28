@@ -1,0 +1,45 @@
+# Integration requirements and status
+
+Status vocabulary (also used in `sync-state.json`):
+
+- **verified**: exercised successfully in the current environment
+- **possible_unconfigured**: known to exist or be achievable, but not set up or not yet tested
+- **unsupported_or_unverified**: no documented support, a terms-of-service problem, or never confirmed
+
+The table records what was established when the foundation was built (2026-10-26, Windows, Claude Code 2.1.310). Codex and Kimi Code were **not installed**, so nothing is "verified" for them. Re-check at run time and write results to `sync-state.json`; do not trust this table over a live test.
+
+| Capability | Requirement | Status | Safe default |
+|---|---|---|---|
+| Local file read/write | Harness file tools | verified (Claude Code) | Private data directory only |
+| Web search and page fetch | Harness web tools | verified (Claude Code, earlier session); unverified elsewhere | Fall back to asking the user for URLs or pasted text |
+| Browser automation | Claude in Chrome (Anthropic's official extension for Chrome or Edge; `claude --chrome` or `/chrome`; needs a Pro, Max, Team or Enterprise plan; the user installs the extension) or the desktop built-in browser | possible_unconfigured: Chrome 1.0+ and Edge are installed on this PC and Claude Code is 2.1.311, but the extension is not installed and nothing was exercised (docs read 2026-10-27) | Needed for forms; shares the user's own logins; pauses at logins and CAPTCHAs; file uploads up to 10 MB |
+| PDF output of tailored resumes (`scripts/lib/pdf.mjs`) | Chrome or Edge installed (headless, throwaway profile) | **verified** 2026-10-27: Edge made valid one-page PDFs and a full `prepare` produced uploadable files | `prepare` refuses, writing nothing, if no browser is found |
+| Gmail read (Gmail API client, `scripts/gmail-store.mjs`; or a Gmail connector) | OAuth Desktop-app client the user creates, `gmail.readonly`; or a connector | **possible_unconfigured**: on 2026-10-28 the claude.ai Gmail connector's tools (search, read, drafts, send) were listed in the session, but none was called, so nothing is verified. The API client is built and tested with mocks only, never against a real mailbox | Read-only first. Tokens live outside the repository. See `references/platforms.md` and `skills/integrations` |
+| Update checks by date range (`check-updates`, `scripts/updates-store.mjs`) | Gmail API search `after:`/`before:` (epoch seconds), or a connector whose date filter was observed working | Gmail API path: tested with a fake client only. Connector path: **unsupported_or_unverified** until a check shows every result inside the window (`--date-filter-evidence`) | Without a trusted filter the messages are still recorded, but the checkpoint does not move. Pasted mail never moves it |
+| Gmail send | `gmail.send` (sensitive scope), authorized separately from read | possible_unconfigured; tested with mocks only | Off by default; per-message approval always; compose/modify/delete scopes are never requested |
+| Application submission (`submit-application`): `browser` (Claude in Chrome or the built-in browser) or `portal-api` | A permitted browser session or an official API | **possible_unconfigured**; never exercised in this repository, only tested with mocks. Recorded per session with `submit-store.mjs set-integration` and treated as stale after 12 hours | Without a verified integration the skill hands the user the package and destination |
+| Recruiter email send (`contact-recruiter`): `gmail-send`, `outlook-send` | A connector with a send scope | **possible_unconfigured**; tested with mocks only | Copy-ready draft plus `mailto:` destination |
+| LinkedIn application or messaging automation | none | unsupported_or_unverified, and not built | Copy-ready text and the official destination; the user sends it |
+| Google Drive resume import | Drive connector | possible_unconfigured (needs authentication) | Optional; local file is the baseline |
+| Public ATS posting pages (for example Lever) | Page fetch | verified (a Lever posting fetched with full details, 2026-10-26) | Primary place to verify listings |
+| ATS public posting feeds: Greenhouse, Lever, Ashby (`scripts/feed-search.mjs ats`) | HTTP access, Node 18+ | **verified** 2026-10-27 (six live boards returned JSON, 84 intern postings parsed and passed `check`) | Company list in the data directory; 1 request/second per host; stop on 429 |
+| freehire.me public API (`scripts/feed-search.mjs freehire`; project https://github.com/strelov1/freehire, MIT, reviewed at commit `e5f5053`, **not vendored**: it is a 10,000-file Go/Postgres platform) | HTTP access, Node 18+ | **verified** 2026-10-27 (search with `employment_type`, `work_mode`, `countries`, `collections` facets; 600 requests/minute, no key) | Personal, non-commercial use per its API terms. Sends only the filter query. Aggregator records stay `discovered` until the original posting is opened. Its login-bound features (CV tailoring, auto-apply, mailbox) are not used |
+| Glassdoor | none | unsupported_or_unverified | Not scraped; manual leads only |
+| Internshala, Wellfound public pages | Page fetch | verified for public pages (a listing came back closed; a Wellfound listing returned 410); see `skills/run-search/references/sources.md` | Open each listing; closed or gone means expired |
+| Naukri | none | unsupported_or_unverified (HTTP 403) | Do not bypass |
+| Devfolio, startup.gallery, PeoplePerHour | none | unsupported_or_unverified for internships | Not internship sources |
+| Scrapling (page-reading chain, preferred backend) | Python 3.10+, `scrapling[fetchers]`, browsers | possible_unconfigured (not installed; Python absent on the dev machine; untested) | Plain fetcher and parser on one permitted page; its stealth, Turnstile bypass, and proxy features are never used |
+| ScrapeGraphAI (page-reading chain, fallback backend) | Python, scrapegraphai, Playwright, an LLM | possible_unconfigured (not installed; untested) | Only if selectors are impractical; output unverified until checked against the page |
+| Agent Reach (`agent-reach` skill; https://github.com/Panniantong/Agent-Reach, commit `14c2134`) | Python 3.10+ via uv; read-only CLI | **verified** 2026-10-26 (vendored in `vendor/agent-reach/`, v1.6.0; `web` search/read and `github` search/read exercised). **Main provider for reads and searches** | Default `web` and `github` channels, public content only. Never LinkedIn/BOSS/social channels, login, session or cookie reuse, or CloakBrowser (those reuse the user's logins). The `web` channel sends URLs and queries to Jina Reader and Exa. See `skills/run-search/references/agent-reach-install.md` |
+| People or email lookup tools, directory scraping, mailbox probing | various | unsupported_or_unverified; **not adopted** | See `references/contact-discovery.md` |
+| LinkedIn / Indeed automation, scraping, auto-apply | none | unsupported_or_unverified, and discouraged | User-driven browsing only |
+| LinkedIn messaging | none | unsupported_or_unverified | Draft text for the user to send |
+| CAPTCHA or login bypass | none | not permitted | Hand off to the user |
+
+## Page-reading fallback chain
+
+`skills/run-search/references/reading-pages.md` reads public pages in this order: Agent Reach, then configured official connectors, then Scrapling, then ScrapeGraphAI. A block, login wall, or rate limit stops the chain; it never triggers the next provider. Each provider keeps the status in the table above until it is exercised in a session.
+
+## Adapter requirements (for later phases)
+
+Each job source gets one markdown file under `skills/job-discovery/references/sources/` stating: access method, tools required, terms-of-service notes, how to detect failure, what to record in `search-history.csv`, and its integration status. A source whose tools are missing must degrade to a manual hand-off, never to guessing.

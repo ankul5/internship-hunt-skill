@@ -1,0 +1,11 @@
+# Employer career boards for: node scripts/feed-search.mjs ats --file <this file>
+# One per line: provider:slug  or  provider:slug=Company Name   (providers: greenhouse, lever, ashby)
+# The slug is the last part of the board URL: job-boards.greenhouse.io/<slug>, jobs.lever.co/<slug>, jobs.ashbyhq.com/<slug>.
+# Add only boards you have seen work; a wrong slug is reported as a failed search, not guessed.
+# Verified to return a feed on 2026-10-27:
+greenhouse:stripe=Stripe
+greenhouse:databricks=Databricks
+greenhouse:gitlab=GitLab
+lever:palantir=Palantir
+ashby:ramp=Ramp
+ashby:notion=Notion

@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Candidate profile",
+  "description": "Single source of candidate facts. Tailoring may use only facts present here. Absence from `provenance` means unconfirmed.",
+  "type": "object",
+  "required": ["schema_version", "updated_at", "identity", "education", "experience", "projects", "skills", "certifications", "resume", "preferences", "provenance", "open_questions"],
+  "properties": {
+    "schema_version": {"type": "integer"},
+    "updated_at": {"type": ["string", "null"], "description": "ISO 8601 UTC"},
+    "identity": {
+      "type": "object",
+      "required": ["full_name", "email", "phone", "location", "links", "work_authorization"],
+      "properties": {
+        "full_name": {"type": ["string", "null"]},
+        "email": {"type": ["string", "null"]},
+        "phone": {"type": ["string", "null"]},
+        "location": {"type": ["string", "null"]},
+        "links": {
+          "type": "object",
+          "properties": {
+            "linkedin": {"type": ["string", "null"]},
+            "github": {"type": ["string", "null"]},
+            "portfolio": {"type": ["string", "null"]},
+            "other": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "work_authorization": {
+          "type": "object",
+          "required": ["status", "countries", "needs_sponsorship"],
+          "properties": {
+            "status": {"type": ["string", "null"]},
+            "countries": {"type": "array", "items": {"type": "string"}},
+            "needs_sponsorship": {"type": ["boolean", "null"]}
+          }
+        }
+      }
+    },
+    "education": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["institution", "degree", "provenance"],
+        "properties": {
+          "institution": {"type": "string"},
+          "degree": {"type": "string"},
+          "field": {"type": ["string", "null"]},
+          "start_date": {"type": ["string", "null"]},
+          "end_date": {"type": ["string", "null"]},
+          "gpa": {"type": ["string", "null"]},
+          "coursework": {"type": "array", "items": {"type": "string"}},
+          "provenance": {"type": "string", "enum": ["resume", "user_stated", "inferred_unconfirmed"]}
+        }
+      }
+    },
+    "experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["organization", "title", "provenance"],
+        "properties": {
+          "organization": {"type": "string"},
+          "title": {"type": "string"},
+          "start_date": {"type": ["string", "null"]},
+          "end_date": {"type": ["string", "null"]},
+          "location": {"type": ["string", "null"]},
+          "highlights": {"type": "array", "items": {"type": "string"}},
+          "provenance": {"type": "string", "enum": ["resume", "user_stated", "inferred_unconfirmed"]}
+        }
+      }
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "provenance"],
+        "properties": {
+          "name": {"type": "string"},
+          "description": {"type": ["string", "null"]},
+          "technologies": {"type": "array", "items": {"type": "string"}},
+          "url": {"type": ["string", "null"]},
+          "highlights": {"type": "array", "items": {"type": "string"}},
+          "provenance": {"type": "string", "enum": ["resume", "user_stated", "inferred_unconfirmed"]}
+        }
+      }
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "provenance"],
+        "properties": {
+          "name": {"type": "string"},
+          "category": {"type": ["string", "null"]},
+          "provenance": {"type": "string", "enum": ["resume", "user_stated", "inferred_unconfirmed"]}
+        }
+      }
+    },
+    "certifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "provenance"],
+        "properties": {
+          "name": {"type": "string"},
+          "issuer": {"type": ["string", "null"]},
+          "date": {"type": ["string", "null"]},
+          "provenance": {"type": "string", "enum": ["resume", "user_stated", "inferred_unconfirmed"]}
+        }
+      }
+    },
+    "resume": {
+      "type": "object",
+      "required": ["source_path", "parsed_at"],
+      "properties": {
+        "source_path": {"type": ["string", "null"], "description": "Relative to the private data directory"},
+        "parsed_at": {"type": ["string", "null"]}
+      }
+    },
+    "preferences": {
+      "type": "object",
+      "required": ["target_roles", "locations", "remote_types", "earliest_start", "latest_start", "duration_weeks_min", "duration_weeks_max", "min_stipend_text", "industries", "excluded_companies", "deal_breakers"],
+      "properties": {
+        "target_roles": {"type": "array", "items": {"type": "string"}},
+        "locations": {"type": "array", "items": {"type": "string"}},
+        "remote_types": {"type": "array", "items": {"type": "string", "enum": ["onsite", "hybrid", "remote"]}},
+        "earliest_start": {"type": ["string", "null"]},
+        "latest_start": {"type": ["string", "null"]},
+        "duration_weeks_min": {"type": ["integer", "null"]},
+        "duration_weeks_max": {"type": ["integer", "null"]},
+        "min_stipend_text": {"type": ["string", "null"]},
+        "industries": {"type": "array", "items": {"type": "string"}},
+        "excluded_companies": {"type": "array", "items": {"type": "string"}},
+        "deal_breakers": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "description": "Dotted field path -> resume | user_stated | inferred_unconfirmed, for scalar fields in identity and preferences",
+      "additionalProperties": {"type": "string", "enum": ["resume", "user_stated", "inferred_unconfirmed"]}
+    },
+    "open_questions": {
+      "type": "array",
+      "description": "Missing or ambiguous items the agent still has to ask the user about",
+      "items": {"type": "string"}
+    }
+  }
+}

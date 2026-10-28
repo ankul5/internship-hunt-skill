@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sync state",
+  "description": "Cursors, locks, and integration status. Contains no credentials or tokens.",
+  "type": "object",
+  "required": ["schema_version", "last_run_id", "last_job_search_at", "last_backup_at", "lock", "integrations", "gmail", "sources"],
+  "properties": {
+    "schema_version": {"type": "integer"},
+    "last_run_id": {"type": ["string", "null"]},
+    "last_job_search_at": {"type": ["string", "null"]},
+    "last_backup_at": {"type": ["string", "null"]},
+    "lock": {
+      "type": "object",
+      "description": "Advisory lock so two sessions do not write the CSVs at once. A lock older than 2 hours may be treated as stale after asking the user.",
+      "required": ["holder", "acquired_at"],
+      "properties": {
+        "holder": {"type": ["string", "null"], "description": "run_id of the holder"},
+        "acquired_at": {"type": ["string", "null"]}
+      }
+    },
+    "integrations": {
+      "type": "object",
+      "description": "Integration name -> status record",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status", "checked_at"],
+        "properties": {
+          "status": {"type": "string", "enum": ["verified", "possible_unconfigured", "unsupported_or_unverified"]},
+          "checked_at": {"type": ["string", "null"]},
+          "notes": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "gmail": {
+      "type": "object",
+      "required": ["last_sync_at", "cursor"],
+      "properties": {
+        "last_sync_at": {"type": ["string", "null"]},
+        "cursor": {"type": ["string", "null"], "description": "Provider history/page cursor; opaque"}
+      }
+    },
+    "updates": {
+      "type": "object",
+      "description": "check-updates coverage. Optional; written by scripts/lib/updates.mjs only after a complete check has been persisted.",
+      "properties": {
+        "tz_offset": {"type": ["string", "null"], "description": "User's UTC offset such as +05:30, for today/yesterday/date ranges"},
+        "sources": {
+          "type": "object",
+          "description": "Update source (gmail-api, gmail-connector) -> coverage",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "covered": {"type": "array", "description": "Merged [from, to] UTC intervals that were checked completely"},
+              "last_success_at": {"type": ["string", "null"]},
+              "last_window": {"type": "array"}
+            }
+          }
+        }
+      }
+    },
+    "sources": {
+      "type": "object",
+      "description": "Job source name -> last search info",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "last_searched_at": {"type": ["string", "null"]},
+          "cursor": {"type": ["string", "null"]}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,202 @@
+{
+  "schema_version": 2,
+  "conventions": {
+    "encoding": "UTF-8, no BOM, LF line endings, RFC 4180 quoting, header row required",
+    "datetime": "ISO 8601 UTC, YYYY-MM-DDTHH:MM:SSZ",
+    "date": "YYYY-MM-DD",
+    "list": "semicolon-separated values with no spaces around the semicolon",
+    "path": "relative to the private data directory; no leading slash, drive letter, or ..",
+    "missing": "an empty cell means unknown or not applicable; never write N/A, TBD, null, or a guess"
+  },
+  "files": {
+    "jobs.csv": {
+      "idField": "job_id",
+      "idPattern": "^job-\\d{4,}$",
+      "statusField": "status",
+      "columns": [
+        {"name": "job_id", "type": "id", "required": true, "description": "Stable ID, never reused"},
+        {"name": "status", "type": "enum", "required": true, "enum": ["discovered", "verified", "shortlisted", "rejected", "applied", "expired", "archived"], "description": "discovered means found but not yet verified"},
+        {"name": "company", "type": "string", "required": true},
+        {"name": "title", "type": "string", "required": true},
+        {"name": "location", "type": "string", "required": false},
+        {"name": "remote_type", "type": "enum", "required": true, "enum": ["onsite", "hybrid", "remote", "unknown"]},
+        {"name": "employment_type", "type": "enum", "required": true, "enum": ["internship", "co-op", "apprenticeship", "other", "unknown"]},
+        {"name": "duration", "type": "string", "required": false, "description": "As stated in the posting, e.g. 12 weeks"},
+        {"name": "start_date", "type": "date", "required": false},
+        {"name": "stipend_text", "type": "string", "required": false, "description": "Verbatim from the posting; never estimated"},
+        {"name": "posted_date", "type": "date", "required": false},
+        {"name": "deadline", "type": "date", "required": false},
+        {"name": "eligibility_text", "type": "string", "required": false, "description": "Eligibility as stated in the posting (class year, work authorization, enrollment); verbatim or closely paraphrased"},
+        {"name": "qualifications_text", "type": "string", "required": false, "description": "Required and preferred qualifications as stated in the posting"},
+        {"name": "source_name", "type": "string", "required": true, "description": "Board or site name"},
+        {"name": "source_kind", "type": "enum", "required": true, "enum": ["job_board", "company_site", "search_engine", "referral", "user_provided"]},
+        {"name": "source_url", "type": "url", "required": true, "description": "Where the agent actually saw the posting"},
+        {"name": "apply_url", "type": "url", "required": false},
+        {"name": "discovered_at", "type": "datetime", "required": true},
+        {"name": "last_checked_at", "type": "datetime", "required": true, "description": "Last time the agent looked for this listing, successful or not"},
+        {"name": "last_verified_at", "type": "datetime", "required": false, "description": "Last time the original posting was opened and its facts confirmed"},
+        {"name": "verification_notes", "type": "string", "required": false, "description": "What was checked and what was seen"},
+        {"name": "unverified_fields", "type": "list", "required": false, "description": "Column names whose values are not confirmed from the source"},
+        {"name": "uncertainties", "type": "string", "required": false, "description": "Free-text facts that are missing or doubtful"},
+        {"name": "eligibility_check", "type": "enum", "required": true, "enum": ["pass", "fail", "unknown"], "description": "Hard eligibility gates only; separate from fit_score"},
+        {"name": "fit_score", "type": "integer", "required": false, "min": 0, "max": 100, "description": "Weighted rubric score (references/scoring-rubric.md); empty after a hard eligibility failure; provisional while the listing is unverified"},
+        {"name": "fit_rationale", "type": "string", "required": false, "description": "Per-component breakdown; cites profile facts and posting requirements"},
+        {"name": "dedupe_key", "type": "string", "required": true, "description": "lowercase company|title|location with punctuation removed and spaces collapsed"},
+        {"name": "search_id", "type": "id", "required": false, "ref": "search-history.csv.search_id"},
+        {"name": "updated_at", "type": "datetime", "required": true},
+        {"name": "notes", "type": "string", "required": false}
+      ],
+      "requiredWhen": [
+        {"when": {"status": ["verified", "shortlisted", "applied"]}, "require": ["last_verified_at", "verification_notes"]}
+      ],
+      "transitions": {
+        "discovered": ["verified", "rejected", "expired", "archived"],
+        "verified": ["shortlisted", "applied", "rejected", "expired", "archived"],
+        "shortlisted": ["applied", "rejected", "expired", "archived"],
+        "applied": ["archived"],
+        "rejected": ["shortlisted", "archived"],
+        "expired": ["archived"],
+        "archived": []
+      }
+    },
+    "applications.csv": {
+      "idField": "application_id",
+      "idPattern": "^app-\\d{4,}$",
+      "statusField": "status",
+      "columns": [
+        {"name": "application_id", "type": "id", "required": true},
+        {"name": "job_id", "type": "id", "required": true, "ref": "jobs.csv.job_id"},
+        {"name": "status", "type": "enum", "required": true, "enum": ["drafting", "ready_for_review", "approved", "submitted", "submission_unconfirmed", "submission_failed", "acknowledged", "interview", "assessment", "rejected", "offer", "accepted", "declined", "withdrawn"]},
+        {"name": "resume_path", "type": "path", "required": false},
+        {"name": "cover_letter_path", "type": "path", "required": false},
+        {"name": "answers_path", "type": "path", "required": false},
+        {"name": "approved_at", "type": "datetime", "required": false, "description": "When the user explicitly approved this exact package"},
+        {"name": "approval_note", "type": "string", "required": false, "description": "The user's approval wording, quoted"},
+        {"name": "submission_method", "type": "enum", "required": false, "enum": ["portal", "email", "manual_by_user", "other"]},
+        {"name": "submitted_at", "type": "datetime", "required": false},
+        {"name": "submission_result", "type": "enum", "required": false, "enum": ["success", "failed", "unconfirmed"]},
+        {"name": "confirmation_evidence", "type": "string", "required": false, "description": "Confirmation page text, reference number, or email ID actually observed"},
+        {"name": "last_response_at", "type": "datetime", "required": false},
+        {"name": "next_action", "type": "string", "required": false},
+        {"name": "next_action_due", "type": "date", "required": false},
+        {"name": "created_at", "type": "datetime", "required": true},
+        {"name": "updated_at", "type": "datetime", "required": true},
+        {"name": "notes", "type": "string", "required": false}
+      ],
+      "requiredWhen": [
+        {"when": {"status": ["approved", "submitted", "submission_unconfirmed", "submission_failed", "acknowledged", "interview", "assessment", "offer", "accepted"]}, "require": ["approved_at", "approval_note"]},
+        {"when": {"status": ["submitted", "acknowledged", "interview", "assessment", "offer", "accepted"]}, "require": ["submitted_at", "submission_method", "submission_result", "confirmation_evidence"]}
+      ],
+      "transitions": {
+        "drafting": ["ready_for_review", "withdrawn"],
+        "ready_for_review": ["drafting", "approved", "withdrawn"],
+        "approved": ["drafting", "submitted", "submission_unconfirmed", "submission_failed", "withdrawn"],
+        "submission_failed": ["approved", "drafting", "withdrawn"],
+        "submission_unconfirmed": ["submitted", "submission_failed", "withdrawn"],
+        "submitted": ["acknowledged", "interview", "assessment", "rejected", "offer", "withdrawn"],
+        "acknowledged": ["interview", "assessment", "rejected", "offer", "withdrawn"],
+        "interview": ["assessment", "rejected", "offer", "withdrawn"],
+        "assessment": ["interview", "rejected", "offer", "withdrawn"],
+        "offer": ["accepted", "declined", "rejected", "withdrawn"],
+        "accepted": [],
+        "declined": [],
+        "rejected": [],
+        "withdrawn": []
+      }
+    },
+    "email-events.csv": {
+      "idField": "event_id",
+      "idPattern": "^eml-\\d{4,}$",
+      "statusField": "status",
+      "columns": [
+        {"name": "event_id", "type": "id", "required": true},
+        {"name": "application_id", "type": "id", "required": false, "ref": "applications.csv.application_id"},
+        {"name": "job_id", "type": "id", "required": false, "ref": "jobs.csv.job_id"},
+        {"name": "direction", "type": "enum", "required": true, "enum": ["outbound", "inbound"]},
+        {"name": "kind", "type": "enum", "required": true, "enum": ["recruiter_outreach", "application_email", "reply", "follow_up", "interview_invite", "assessment", "rejection", "offer", "other"]},
+        {"name": "status", "type": "enum", "required": true, "enum": ["draft", "approved", "sent", "failed", "discarded", "received", "processed"]},
+        {"name": "provider", "type": "enum", "required": true, "enum": ["gmail", "outlook", "manual", "other"]},
+        {"name": "contact_name", "type": "string", "required": false},
+        {"name": "contact_email", "type": "string", "required": false},
+        {"name": "contact_source_url", "type": "url", "required": false, "description": "Where the contact was found; required for outreach to a contact not given by the user"},
+        {"name": "subject", "type": "string", "required": false},
+        {"name": "thread_id", "type": "string", "required": false},
+        {"name": "provider_message_id", "type": "string", "required": false},
+        {"name": "draft_path", "type": "path", "required": false},
+        {"name": "approved_at", "type": "datetime", "required": false},
+        {"name": "occurred_at", "type": "datetime", "required": false, "description": "Send or receive time reported by the provider"},
+        {"name": "summary", "type": "string", "required": false, "description": "Short factual summary; never the full message body"},
+        {"name": "action_required", "type": "string", "required": false},
+        {"name": "created_at", "type": "datetime", "required": true},
+        {"name": "updated_at", "type": "datetime", "required": true}
+      ],
+      "requiredWhen": [
+        {"when": {"status": ["approved", "sent"]}, "require": ["approved_at", "draft_path"]},
+        {"when": {"status": ["sent", "received", "processed"]}, "require": ["occurred_at", "provider_message_id"]}
+      ],
+      "transitions": {
+        "draft": ["approved", "discarded"],
+        "approved": ["sent", "failed", "draft", "discarded"],
+        "failed": ["approved", "draft", "discarded"],
+        "sent": [],
+        "discarded": [],
+        "received": ["processed"],
+        "processed": []
+      }
+    },
+    "search-history.csv": {
+      "idField": "search_id",
+      "idPattern": "^srch-\\d{4,}$",
+      "statusField": "status",
+      "columns": [
+        {"name": "search_id", "type": "id", "required": true},
+        {"name": "run_id", "type": "id", "required": false, "ref": "run-history.csv.run_id"},
+        {"name": "executed_at", "type": "datetime", "required": true},
+        {"name": "source_name", "type": "string", "required": true},
+        {"name": "query", "type": "string", "required": true, "description": "Exact query or URL used"},
+        {"name": "filters", "type": "string", "required": false},
+        {"name": "status", "type": "enum", "required": true, "enum": ["completed", "partial", "failed"]},
+        {"name": "result_count", "type": "integer", "required": false, "min": 0},
+        {"name": "new_job_count", "type": "integer", "required": false, "min": 0},
+        {"name": "error", "type": "string", "required": false},
+        {"name": "notes", "type": "string", "required": false}
+      ],
+      "requiredWhen": [
+        {"when": {"status": ["failed", "partial"]}, "require": ["error"]},
+        {"when": {"status": ["completed"]}, "require": ["result_count"]}
+      ],
+      "transitions": {}
+    },
+    "run-history.csv": {
+      "idField": "run_id",
+      "idPattern": "^run-\\d{4,}$",
+      "statusField": "outcome",
+      "columns": [
+        {"name": "run_id", "type": "id", "required": true},
+        {"name": "started_at", "type": "datetime", "required": true},
+        {"name": "ended_at", "type": "datetime", "required": false},
+        {"name": "harness", "type": "enum", "required": true, "enum": ["claude-code", "codex", "kimi-code", "other", "unknown"]},
+        {"name": "skill", "type": "string", "required": true},
+        {"name": "outcome", "type": "enum", "required": true, "enum": ["in_progress", "completed", "partial", "failed", "aborted"]},
+        {"name": "summary", "type": "string", "required": false},
+        {"name": "rows_created", "type": "integer", "required": false, "min": 0},
+        {"name": "rows_updated", "type": "integer", "required": false, "min": 0},
+        {"name": "approvals_requested", "type": "integer", "required": false, "min": 0},
+        {"name": "approvals_granted", "type": "integer", "required": false, "min": 0},
+        {"name": "error", "type": "string", "required": false},
+        {"name": "notes", "type": "string", "required": false}
+      ],
+      "requiredWhen": [
+        {"when": {"outcome": ["completed", "partial", "failed", "aborted"]}, "require": ["ended_at"]},
+        {"when": {"outcome": ["failed"]}, "require": ["error"]}
+      ],
+      "transitions": {
+        "in_progress": ["completed", "partial", "failed", "aborted"],
+        "completed": [],
+        "partial": [],
+        "failed": [],
+        "aborted": []
+      }
+    }
+  }
+}

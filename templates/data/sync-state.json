@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "last_run_id": null,
+  "last_job_search_at": null,
+  "last_backup_at": null,
+  "lock": {"holder": null, "acquired_at": null},
+  "integrations": {},
+  "gmail": {"last_sync_at": null, "cursor": null},
+  "sources": {}
+}

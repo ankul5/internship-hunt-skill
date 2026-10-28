@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "last_run_id": "run-0001",
+  "last_job_search_at": "2026-10-20T14:30:00Z",
+  "last_backup_at": null,
+  "lock": {"holder": null, "acquired_at": null},
+  "integrations": {
+    "web-search": {"status": "verified", "checked_at": "2026-10-20T14:00:00Z", "notes": "Fictional fixture"},
+    "gmail": {"status": "possible_unconfigured", "checked_at": "2026-10-20T14:00:00Z", "notes": "No connector installed in this fictional example"}
+  },
+  "gmail": {"last_sync_at": null, "cursor": null},
+  "sources": {
+    "Example Board": {"last_searched_at": "2026-10-20T14:00:00Z", "cursor": null}
+  }
+}

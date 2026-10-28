@@ -1,0 +1,76 @@
+# ---------------------------------------------------------------------------
+# PRIVACY: nothing personal may be committed. See references/privacy-policy.md
+# ---------------------------------------------------------------------------
+
+# Private working data (profile, trackers, resumes, drafts, email exports, backups)
+/private/
+resumes/
+tailored/
+drafts/
+email-exports/
+exports/
+backups/
+*.bak
+
+# Data files wherever they appear; only the blank templates and fictional
+# fixtures are re-allowed below.
+candidate-profile.json
+sync-state.json
+jobs.csv
+applications.csv
+email-events.csv
+search-history.csv
+run-history.csv
+!/templates/data/*
+!/tests/fixtures/*
+
+# Personal documents and mail exports
+*.pdf
+*.doc
+*.docx
+*.rtf
+*.odt
+*.pages
+*.mbox
+*.eml
+*.msg
+*.pst
+*.ics
+
+# Credentials, tokens, keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.token
+*token.json
+credentials.json
+client_secret*.json
+service-account*.json
+secrets/
+
+# MCP / local settings can embed tokens or personal paths
+.mcp.json
+.kimi-code/mcp.json
+.claude/settings.local.json
+
+# Generated harness discovery copies/links (created by scripts/setup.*)
+/.claude/skills/
+/.agents/skills/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.vscode/
+.idea/
+node_modules/
+
+# Gmail OAuth client and token files must never be committed (they live outside the repository by default)
+google-oauth-client.json
+gmail-token.json
+client_secret*.json

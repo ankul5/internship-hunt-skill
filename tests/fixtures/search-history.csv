@@ -1,0 +1,3 @@
+search_id,run_id,executed_at,source_name,query,filters,status,result_count,new_job_count,error,notes
+srch-0001,run-0001,2026-10-20T14:00:00Z,Example Board,intern 2027,remote=any,completed,3,3,,
+srch-0002,run-0001,2026-10-20T14:20:00Z,Example Careers,internship 2027,,failed,,,HTTP 503 from careers.example.com,Retry next run

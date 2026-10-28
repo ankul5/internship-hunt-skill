@@ -1,0 +1,87 @@
+{
+  "_comment": "Single source of truth for the per-platform matrix. references/platforms.md is generated from this file: node scripts/integrations-store.mjs render-platforms --write. A status is 'verified' only for something actually exercised, with the date and what was seen in 'evidence'.",
+  "statuses": ["verified", "possible_unconfigured", "unsupported_or_unverified"],
+  "platforms": [
+    {
+      "id": "greenhouse-lever-ashby", "name": "Employer career pages on Greenhouse, Lever, Ashby",
+      "search": { "method": "Employer's own public JSON feed per company (boards-api.greenhouse.io, api.lever.co, api.ashbyhq.com); no key. The company list is the user's (companies.txt)", "status": "verified" },
+      "apply": { "method": "On the employer's page, by the user or a permitted browser session. Greenhouse's application API needs the employer's own API key (per third-party documentation, not checked), so it is not available to candidates", "status": "unsupported_or_unverified" },
+      "messaging": { "method": "none", "status": "unsupported_or_unverified" },
+      "auth": "None for reading", "limits": "Read-only; one request per second per host; no endpoint lists all customers",
+      "verified_on": "2026-10-27", "evidence": "Six boards (Stripe, Databricks, GitLab, Palantir, Ramp, Notion) returned HTTP 200 JSON; 84 intern postings parsed"
+    },
+    {
+      "id": "freehire", "name": "freehire.me public API",
+      "search": { "method": "GET /api/v1/jobs/search with facets (employment_type, work_mode, countries, collections, company_type); no key", "status": "verified" },
+      "apply": { "method": "Records link to the original posting; apply there", "status": "unsupported_or_unverified" },
+      "messaging": { "method": "none", "status": "unsupported_or_unverified" },
+      "auth": "None for the public read endpoints", "limits": "Personal, non-commercial use; 600 requests per minute per address; records are an aggregator copy, open the original before treating as verified",
+      "verified_on": "2026-10-27", "evidence": "HTTP 200; 2,434 India internships, 452 YC-company internships, 62 global remote internships that day"
+    },
+    {
+      "id": "internshala", "name": "Internshala",
+      "search": { "method": "Public listing pages (/internship/detail/) read one at a time; robots.txt allows that path", "status": "verified" },
+      "apply": { "method": "On the site, signed in as the user, by the user. Not automated", "status": "unsupported_or_unverified" },
+      "messaging": { "method": "none outside the site", "status": "unsupported_or_unverified" },
+      "auth": "User's own account for applying; none for reading public pages", "limits": "India-focused; a listing that says it is unavailable is closed",
+      "verified_on": "2026-10-26", "evidence": "A public listing page loaded and reported itself unavailable; robots.txt read"
+    },
+    {
+      "id": "wellfound", "name": "Wellfound",
+      "search": { "method": "Leads from web search; listing fetch is unreliable", "status": "possible_unconfigured" },
+      "apply": { "method": "On the site, by the user", "status": "unsupported_or_unverified" },
+      "messaging": { "method": "none", "status": "unsupported_or_unverified" },
+      "auth": "User's own account for applying", "limits": "Parameterised job URLs are disallowed by robots.txt; one fetched listing returned HTTP 410 (gone)",
+      "verified_on": "2026-10-26", "evidence": "robots.txt read; one listing returned 410"
+    },
+    {
+      "id": "linkedin", "name": "LinkedIn",
+      "search": { "method": "Public web-search snippets as leads only; linkedin.com is never fetched or scraped. No official job-search API was found or checked", "status": "unsupported_or_unverified" },
+      "apply": { "method": "The user, in their own signed-in browser", "status": "unsupported_or_unverified" },
+      "messaging": { "method": "Copy-ready draft; the user sends it in LinkedIn. Gmail cannot send LinkedIn messages", "status": "unsupported_or_unverified" },
+      "auth": "The user's own login in their own browser; the agent never receives credentials", "limits": "robots.txt prohibits automated access without permission; the agent never reads profiles or people search",
+      "verified_on": "2026-10-26", "evidence": "robots.txt read; only search snippets seen"
+    },
+    {
+      "id": "indeed", "name": "Indeed",
+      "search": { "method": "Leads from web search only", "status": "unsupported_or_unverified" },
+      "apply": { "method": "The user, on the site", "status": "unsupported_or_unverified" },
+      "messaging": { "method": "none", "status": "unsupported_or_unverified" },
+      "auth": "User's own account", "limits": "robots.txt disallows /viewjob for generic crawlers; any partner or publisher API was not checked",
+      "verified_on": "2026-10-26", "evidence": "robots.txt read"
+    },
+    {
+      "id": "naukri", "name": "Naukri.com",
+      "search": { "method": "None: robots.txt and a listing page both returned HTTP 403", "status": "unsupported_or_unverified" },
+      "apply": { "method": "The user, on the site", "status": "unsupported_or_unverified" },
+      "messaging": { "method": "none", "status": "unsupported_or_unverified" },
+      "auth": "User's own account", "limits": "Inaccessible to automated reads; do not bypass. The user can paste a URL or the posting text",
+      "verified_on": "2026-10-26", "evidence": "HTTP 403 on robots.txt and on a listing"
+    },
+    {
+      "id": "glassdoor", "name": "Glassdoor",
+      "search": { "method": "None tried. Its terms and robots.txt were not reviewed, so it is treated as unsupported until they are", "status": "unsupported_or_unverified" },
+      "apply": { "method": "The user, on the site", "status": "unsupported_or_unverified" },
+      "messaging": { "method": "none", "status": "unsupported_or_unverified" },
+      "auth": "User's own account", "limits": "Manual leads only: the user pastes a link",
+      "verified_on": null, "evidence": "Not tried"
+    },
+    {
+      "id": "gmail", "name": "Gmail",
+      "search": { "method": "Not a job source", "status": "unsupported_or_unverified" },
+      "apply": { "method": "Not an application channel", "status": "unsupported_or_unverified" },
+      "messaging": { "method": "Gmail API: read with gmail.readonly (restricted scope), send with gmail.send (sensitive scope); each authorized separately. Replies thread with In-Reply-To and References headers", "status": "possible_unconfigured" },
+      "auth": "OAuth 2.0 loopback flow with PKCE, using a Desktop-app OAuth client the user creates in their own Google Cloud project; tokens stay outside the repository",
+      "limits": "No compose, modify or delete scope is requested, so mail is never altered. For a personal Google Cloud project the consent screen shows an unverified-app notice. How long refresh tokens last for an app in Testing status was not verified; re-authorize if access stops working",
+      "verified_on": null, "evidence": "Not configured; documented in Google's Gmail API and OAuth 2.0 desktop-app guides (read 2026-10-27)"
+    },
+    {
+      "id": "outlook", "name": "Outlook / Microsoft 365 mail",
+      "search": { "method": "Not a job source", "status": "unsupported_or_unverified" },
+      "apply": { "method": "Not an application channel", "status": "unsupported_or_unverified" },
+      "messaging": { "method": "Not implemented. Microsoft Graph exists but was not checked", "status": "unsupported_or_unverified" },
+      "auth": "Not applicable", "limits": "Copy-ready drafts only",
+      "verified_on": null, "evidence": "Not tried"
+    }
+  ]
+}
