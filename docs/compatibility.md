@@ -4,7 +4,7 @@ Facts below come from the vendors' documentation, fetched 2026-10-26 and re-chec
 
 **Status per harness (2026-10-30):**
 
-- **Claude Code: tested.** Skills are discovered from `.claude/skills/` (the session lists all ten, including edits made to `skills/` through the setup links), slash invocation works, and the helper scripts and all 164 tests run under it on Windows.
+- **Claude Code: tested.** Skills are discovered from `.claude/skills/` (the session lists all ten, including edits made to `skills/` through the setup links), slash invocation works, and the helper scripts and all tests run under it on Windows.
 - **Codex: unverified.** Not installed. The layout follows its documented conventions (`.agents/skills/`, `name` and `description`, `agents/openai.yaml` for the three send/submit skills), but nothing has been run in it.
 - **Kimi Code: unverified.** Not installed. Same: `.agents/skills/` is one of its documented project folders and it accepts `disableModelInvocation` (also spelled `disable-model-invocation`), but nothing has been run in it.
 

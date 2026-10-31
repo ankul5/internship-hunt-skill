@@ -11,7 +11,11 @@
 <p align="center">
   <a href="https://github.com/ankul5/internship-hunt-skill/actions/workflows/ci.yml"><img src="https://github.com/ankul5/internship-hunt-skill/actions/workflows/ci.yml/badge.svg" alt="CI" height="20"></a>
   &nbsp;
-  <a href="https://claude.com/claude-code"><img src="https://img.shields.io/badge/built_for-Claude_Code-7a1f2b?style=flat" alt="Built for Claude Code" height="20"></a>
+  <a href="#one-skill-set-three-agents"><img src="https://img.shields.io/badge/Claude_Code-tested-7a1f2b?style=flat" alt="Claude Code: tested" height="20"></a>
+  &nbsp;
+  <a href="#one-skill-set-three-agents"><img src="https://img.shields.io/badge/OpenAI_Codex-supported-1c1c24?style=flat" alt="OpenAI Codex: supported" height="20"></a>
+  &nbsp;
+  <a href="#one-skill-set-three-agents"><img src="https://img.shields.io/badge/Kimi_Code-supported-1c1c24?style=flat" alt="Kimi Code: supported" height="20"></a>
   &nbsp;
   <a href="https://agentskills.io/specification"><img src="https://img.shields.io/badge/format-Agent_Skills-3b6fb6?style=flat" alt="Agent Skills" height="20"></a>
   &nbsp;
@@ -21,7 +25,7 @@
 </p>
 
 <p align="center">
-  An internship search agent that lives in your terminal.<br>
+  An internship search agent for <b>Claude Code</b>, <b>OpenAI Codex</b> and <b>Kimi Code</b>.<br>
   It finds real openings, checks them, ranks them against your profile, tailors a one-page resume and cover letter,<br>
   and tracks every application, asking for your approval before anything leaves your machine.
 </p>
@@ -43,11 +47,11 @@
 </p>
 
 > [!NOTE]
-> An independent open-source project, not affiliated with or endorsed by Anthropic. Claude Code is named only because it is the tool this workflow runs in.
+> An independent open-source project, not affiliated with or endorsed by Anthropic, OpenAI or Moonshot AI. Their tools are named only because this workflow runs in them.
 
 ## What this is
 
-A folder of [Agent Skills](https://agentskills.io/specification): plain-language instructions your coding agent follows, plus small Node scripts for the parts a language model should not be trusted with (IDs, deduplication, scoring, fact checks, approvals, safe CSV writes). There is no website, server or account. Your profile, jobs and applications are CSV and JSON files in a private folder that Git ignores.
+One folder of [Agent Skills](https://agentskills.io/specification), the open format that Claude Code, OpenAI Codex and Kimi Code all read: plain-language instructions your coding agent follows, plus small Node scripts for the parts a language model should not be trusted with (IDs, deduplication, scoring, fact checks, approvals, safe CSV writes). There is no website, server or account. Your profile, jobs and applications are CSV and JSON files in a private folder that Git ignores.
 
 <p align="center">
   <img src="assets/readme/workflow.svg" alt="Five commands, two gates: a gold cursor steps through /profile-setup, /run-search, you approve the jobs, /apply, you approve the exact package, /submit-application or /contact-recruiter, and /check-updates." width="100%">
@@ -78,7 +82,7 @@ A folder of [Agent Skills](https://agentskills.io/specification): plain-language
 
 | | |
 |---|---|
-| **[Claude Code](https://claude.com/claude-code)** | Or another agent that reads Agent Skills (OpenAI Codex, Kimi Code). See [compatibility](docs/compatibility.md). |
+| **A coding agent** | [Claude Code](https://claude.com/claude-code), [OpenAI Codex](https://openai.com/codex/) or [Kimi Code](https://moonshotai.github.io/kimi-code/en/). See [which agent](#one-skill-set-three-agents). |
 | **Node.js 18+** | Runs the helper scripts and tests. No `npm install`: there are no dependencies. |
 | **Chrome or Edge** | Already installed on most computers. Used headless to make the PDFs. |
 | **Python 3.10+** *(optional)* | Only for the optional Agent Reach web search and Scrapling page reader. |
@@ -102,13 +106,17 @@ powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 bash scripts/setup.sh
 ```
 
-Setup links the skills into `.claude/skills/` and `.agents/skills/` and creates your private data folder, `private/`, from blank templates. It never overwrites existing data. To keep your data somewhere else, set `INTERNSHIP_AGENT_HOME` first.
+Setup links the skills into `.claude/skills/` (read by Claude Code) and `.agents/skills/` (read by Codex and Kimi Code), and creates your private data folder, `private/`, from blank templates. It never overwrites existing data. To keep your data somewhere else, set `INTERNSHIP_AGENT_HOME` first.
 
-### 3. Open Claude Code in the folder
+### 3. Open your agent in the folder
 
 ```bash
-claude
+claude      # Claude Code
+codex       # OpenAI Codex
+kimi        # Kimi Code
 ```
+
+The examples below use Claude Code's `/name`. In Codex type `$name` instead (for example `$profile-setup`), and in Kimi Code `/skill:name` (for example `/skill:profile-setup`).
 
 ### 4. Build your profile
 
@@ -223,15 +231,20 @@ The rules every skill follows ([AGENTS.md](AGENTS.md), [safety policy](reference
 > [!IMPORTANT]
 > Use your own clone, not a fork, for a real search. Your data stays in `private/`, which Git ignores, but run `git status` before you push anything.
 
-## Works with other agents
+## One skill set, three agents
 
-| Agent | Skills folder | Start with |
-|---|---|---|
-| Claude Code | `.claude/skills/` | `/internship-agent` |
-| OpenAI Codex | `.agents/skills/` | `$internship-agent` |
-| Kimi Code | `.agents/skills/` | `/skill:internship-agent` *(unverified)* |
+The skills are written once, in the open [Agent Skills](https://agentskills.io/specification) format, and setup exposes them where each agent looks. Every step underneath is a plain `node scripts/...` command, so any agent with a shell can run it.
 
-Details and troubleshooting: [docs/compatibility.md](docs/compatibility.md).
+| | Claude Code | OpenAI Codex | Kimi Code |
+|---|---|---|---|
+| **Skills folder** | `.claude/skills/` | `.agents/skills/` | `.agents/skills/` |
+| **Run a skill** | `/profile-setup` | `$profile-setup` | `/skill:profile-setup` |
+| **Start here** | `/internship-agent` | `$internship-agent` | `/skill:internship-agent` |
+| **Instructions file** | `CLAUDE.md` (imports `AGENTS.md`) | `AGENTS.md` | `AGENTS.md` |
+| **Send/submit skills user-only** | `disable-model-invocation` | `agents/openai.yaml` | `disable-model-invocation` |
+| **Status** | ✅ tested end to end | follows Codex's documented layout, not yet run | follows Kimi Code's documented layout, not yet run |
+
+Multiple-choice question cards use Claude Code's question tool. Other agents ask the same questions as a numbered list. Tried it in Codex or Kimi Code? Please open an issue with what worked. Details and troubleshooting: [docs/compatibility.md](docs/compatibility.md).
 
 <details>
 <summary><b>Project layout</b></summary>
@@ -261,7 +274,7 @@ node tests/validate.mjs          # structure, schemas, links, privacy checks
 node --test tests/*.test.mjs     # all test suites
 ```
 
-The tests use fictional data and stand-ins for the network, email and browser, so nothing is fetched, sent or submitted. `tests/e2e.test.mjs` runs the whole workflow on one job, from profile to follow-up. Edit skills in `skills/` only. `.claude/skills/` and `.agents/skills/` are generated by setup.
+The tests use fictional data and stand-ins for the network, email and browser, so nothing is fetched, sent or submitted. `tests/e2e.test.mjs` runs the whole workflow on one job, from profile to follow-up. Edit skills in `skills/` only. `.claude/skills/` and `.agents/skills/` are generated by setup, so one edit reaches every agent.
 
 ## Acknowledgements
 
