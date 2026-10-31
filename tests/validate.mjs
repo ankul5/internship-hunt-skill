@@ -8,7 +8,8 @@ import { spawnSync } from 'node:child_process';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 let failures = 0;
-const fail = (m) => { failures++; console.error(`FAIL  ${m}`); };
+// On GitHub Actions each failure is also an error annotation, readable on the run page without the logs.
+const fail = (m) => { failures++; console.error(`FAIL  ${m}`); if (process.env.GITHUB_ACTIONS) console.log(`::error title=validate::${String(m).replace(/\s+/g, ' ')}`); };
 const warn = (m) => console.warn(`warn  ${m}`);
 const pass = (m) => console.log(`ok    ${m}`);
 const text = (p) => readFileSync(join(root, p), 'utf8').replace(/^﻿/, '');
@@ -169,7 +170,8 @@ if (git('rev-parse', '--is-inside-work-tree').stdout?.trim() !== 'true') {
     'resume.pdf', 'docs/cv.docx', 'cover.doc', 'email-exports/inbox.mbox', 'thread.eml', 'drafts/eml-0001.md', 'tailored/app-0001/resume.md',
     'exports/anything.csv', 'backups/jobs.csv', 'jobs.csv.bak',
     '.env', '.env.local', 'token.json', 'gmail.token.json', 'credentials.json', 'client_secret_123.json', 'id.pem', 'server.key', 'secrets/x',
-    '.mcp.json', '.kimi-code/mcp.json', '.claude/settings.local.json', '.claude/skills/internship-agent/SKILL.md', '.agents/skills/internship-agent/SKILL.md',
+    '.mcp.json', '.kimi-code/mcp.json', '.claude/settings.local.json', // The link folder itself, not a file inside it: on Linux setup makes symlinks, and git refuses paths beyond a symlink.
+    '.claude/skills/internship-agent', '.agents/skills/internship-agent',
   ];
   const shouldTrack = [
     'README.md', 'AGENTS.md', 'CLAUDE.md', '.gitignore', '.env.example',
