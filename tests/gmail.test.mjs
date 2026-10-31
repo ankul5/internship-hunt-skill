@@ -511,7 +511,7 @@ test('readiness: tells Claude what to ask for when something is missing, never a
   const sdir = makeSecrets({ levels: ['read', 'send'] });
   const r = readiness(dir, { sdir, now: T1 });
   assert.deepEqual(Object.keys(r.summary), CATEGORIES);
-  assert.equal(r.items.length, 8);
+  assert.equal(r.items.length, 10);
   for (const i of r.items.filter((x) => x.category !== 'available_and_verified')) assert.ok(i.next_steps.length > 0, `${i.id} needs next steps`);
   assert.ok(RULES_FOR_MISSING.some((x) => /Never ask the user to paste a password, an OAuth client secret, a refresh token or an API key/.test(x)));
   assert.ok(RULES_FOR_MISSING.some((x) => /untrusted.*read it before running it.*explicit agreement/.test(x)));
@@ -525,7 +525,7 @@ test('readiness: tells Claude what to ask for when something is missing, never a
 test('probe: public feeds are marked verified only after a real response, and failures are recorded as such', async () => {
   const dir = makeDir();
   const sdir = makeSecrets();
-  const ok = async (url) => ({ ok: true, status: 200, json: async () => (String(url).includes('greenhouse') || String(url).includes('ashby') ? { jobs: [] } : String(url).includes('freehire') ? { data: [], meta: { total: 12 } } : []) });
+  const ok = async (url) => ({ ok: true, status: 200, json: async () => (/greenhouse|ashby|workable/.test(String(url)) ? { jobs: [] } : String(url).includes('smartrecruiters') ? { content: [] } : String(url).includes('freehire') ? { data: [], meta: { total: 12 } } : []) });
   const bad = async () => ({ ok: false, status: 500, json: async () => ({}) });
   const noSleep = () => Promise.resolve();
   assert.equal((await probe(dir, 'ats-feeds', { fetchImpl: ok, now: T1, sleep: noSleep })).status, 'verified');

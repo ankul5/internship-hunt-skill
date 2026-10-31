@@ -1,0 +1,32 @@
+/* Harvard career-office style. Original CSS for this project (MIT). */
+@page { size: Letter; margin: 0.6in 0.7in; }
+body { font-family: "Garamond", "EB Garamond", "Times New Roman", Times, serif; font-size: 11pt; line-height: 1.25; color: #000; }
+
+.r-header { text-align: center; margin-bottom: 6pt; }
+.r-name { font-size: 18pt; font-weight: 700; margin: 0 0 3pt; letter-spacing: .02em; }
+.r-contact { font-size: 10pt; }
+
+.r-section { margin-top: 9pt; }
+.r-title { text-align: center; font-size: 11pt; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 5pt; padding-bottom: 2pt; border-bottom: .75pt solid #000; }
+
+.r-entry { margin: 0 0 6pt; }
+.r-row-1 .r-org { font-weight: 700; text-transform: uppercase; font-size: 10.5pt; letter-spacing: .02em; }
+.r-row-1 .r-right { font-weight: 400; }
+.r-row-2 { font-style: italic; }
+.r-tech { font-style: italic; font-weight: 400; font-size: 10pt; text-transform: none; }
+.r-projects .r-row-1 .r-org { text-transform: none; font-size: 11pt; }
+.r-projects .r-row-1 .r-right { font-size: 9.5pt; }
+.r-note { font-size: 10.5pt; }
+
+.r-bullets { margin: 2pt 0 0; padding-left: 16pt; }
+.r-bullets li { margin: 0 0 1.5pt; }
+
+.r-skills { font-size: 10.5pt; }
+.r-skill-row { margin-bottom: 1.5pt; }
+.r-skill-cat { font-weight: 700; }
+
+/* Cover letter */
+.r-letter { font-size: 11.5pt; line-height: 1.45; }
+.r-letter .r-header { margin-bottom: 20pt; padding-bottom: 6pt; border-bottom: .75pt solid #000; }
+.r-letter p { margin: 0 0 11pt; }
+.r-date { margin-bottom: 14pt !important; }

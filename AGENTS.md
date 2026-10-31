@@ -19,6 +19,7 @@ This repository is a skills-first internship search agent. The skills in `skills
 | `references/` | Safety and privacy policy, data model, integration status, JSON/CSV schemas |
 | `templates/data/` | Blank data files copied to the private data directory by setup |
 | `templates/documents/` | Resume, cover letter, answers, and outreach templates |
+| `templates/resume/` | Resume PDF templates (`jake`, `harvard`, `modern`); users add their own in `<data dir>/resume-templates/` |
 | `tests/` | `node tests/validate.mjs` and fictional fixtures |
 | `docs/` | Setup and harness compatibility |
 | `private/` | **Git-ignored.** Default private data directory. Override with `INTERNSHIP_AGENT_HOME`. |

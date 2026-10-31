@@ -7,11 +7,12 @@ import { createHash } from 'node:crypto';
 import { serializeCsv } from './csv.mjs';
 import { loadCsvSchemas, checkCsv, isoNow } from './data.mjs';
 import { makePdfs } from './pdf.mjs';
+import { loadTemplate, templateName, renderResumeHtml, renderLetterHtml } from './resume-templates.mjs';
 import { readTable, writeAtomic, nextNum, fmtId, readJson, checkReadiness, RefusedError } from './ingest.mjs';
 import { writeJournaled, recoverJournal } from './journal.mjs';
 
 const CONFIRMED = ['resume', 'user_stated'];
-const LISTS = ['education', 'experience', 'projects', 'skills', 'certifications'];
+const LISTS = ['education', 'experience', 'projects', 'skills', 'certifications', 'achievements'];
 const KINDS = ['general', 'eligibility', 'declaration', 'demographic'];
 const SENSITIVE = ['eligibility', 'declaration', 'demographic'];
 const LEVELS = ['essential', 'preferred'];
@@ -46,7 +47,7 @@ export function resolveRef(profile, ref) {
   } else if (t[0] === 'identity') {
     const keys = t.map((_, i) => t.slice(0, i + 1).join('.'));
     if (!keys.some((k) => CONFIRMED.includes(profile.provenance?.[k]))) return { ok: false, reason: `"${ref}" is not confirmed (no provenance entry)` };
-  } else return { ok: false, reason: `"${ref}" is not a citable profile path (use education, experience, projects, skills, certifications or identity)` };
+  } else return { ok: false, reason: `"${ref}" is not a citable profile path (use education, experience, projects, skills, certifications, achievements or identity)` };
   return { ok: true, value: cur };
 }
 
@@ -185,8 +186,8 @@ export function approveJob(dir, jobId, note, { now = isoNow() } = {}) {
     const { S, jobsT } = loadAll(dir);
     const j = jobOf(jobsT, jobId);
     if (j.status === 'shortlisted') return { updated: 0, result: { job_id: jobId, status: 'shortlisted', changed: false } };
-    if (!['verified', 'rejected'].includes(j.status)) throw new RefusedError(`${jobId} is ${j.status}; only a verified job (or a rejected one the user overrides) can be approved. ${j.status === 'discovered' ? 'Open the posting and verify it first.' : ''}`.trim());
-    if (!j.last_verified_at || !j.verification_notes) throw new RefusedError(`${jobId} has no verification (last_verified_at / verification_notes); verify the posting first`);
+    if (!['verified', 'rejected'].includes(j.status)) throw new RefusedError(`${jobId} is ${j.status}; only a verified job (or a rejected one the user overrides) can be approved. ${j.status === 'discovered' ? `Verify it first: node scripts/career-walk.mjs verify ${jobId}, then check and ingest the draft it writes.` : ''}`.trim());
+    if (!j.last_verified_at || !j.verification_notes) throw new RefusedError(`${jobId} has no verification (last_verified_at / verification_notes); verify the posting first: node scripts/career-walk.mjs verify ${jobId}`);
     j.status = 'shortlisted'; j.updated_at = now;
     j.notes = [j.notes, `[user-approved ${now}] ${str(note)}`].filter(Boolean).join(' | ');
     commit(dir, S, { 'jobs.csv': jobsT }, now);
@@ -320,7 +321,7 @@ function checkPackage(pkg, { profile, job, sources, inputs }) {
   if (!rs || typeof rs !== 'object') fail('resume', 'is required');
   else {
     const seen = new Set();
-    for (const [sec, listName] of [['education', 'education'], ['experience', 'experience'], ['projects', 'projects']]) {
+    for (const [sec, listName] of [['education', 'education'], ['experience', 'experience'], ['projects', 'projects'], ['certifications', 'certifications'], ['achievements', 'achievements']]) {
       (rs[sec] ?? []).forEach((e, i) => {
         const w = `resume.${sec}[${i}]`;
         const x = resolveRef(profile, e.ref);
@@ -347,7 +348,7 @@ function checkPackage(pkg, { profile, job, sources, inputs }) {
     if (!(rs.education ?? []).length && !(rs.experience ?? []).length && !(rs.projects ?? []).length) fail('resume', 'include at least one education, experience or project entry');
     const have = new Map((profile.skills ?? []).filter((s) => CONFIRMED.includes(s.provenance)).map((s) => [s.name.toLowerCase(), s.name]));
     for (const s of rs.skills ?? []) if (!have.has(String(s).toLowerCase())) fail('resume.skills', `"${s}" is not a confirmed skill in the profile`);
-    for (const k of Object.keys(rs)) if (!['education', 'experience', 'projects', 'skills'].includes(k)) fail('resume', `unknown section "${k}" (contact details and dates come from the profile, not the package)`);
+    for (const k of Object.keys(rs)) if (!['education', 'experience', 'projects', 'certifications', 'achievements', 'skills'].includes(k)) fail('resume', `unknown section "${k}" (contact details and dates come from the profile, not the package)`);
   }
 
   // cover letter
@@ -397,7 +398,7 @@ function renderResume(profile, rs) {
   const get = (ref) => resolveRef(profile, ref).value;
   if ((rs.education ?? []).length) {
     L.push('## Education');
-    for (const e of rs.education) { const p = get(e.ref); L.push(`- **${p.institution}**, ${p.degree}${p.field ? ` in ${p.field}` : ''}${dateRange(p) ? ` (${dateRange(p)})` : ''}${p.gpa ? `, GPA ${p.gpa}` : ''}`); if ((e.include_coursework ?? []).length) L.push(`  - Coursework: ${e.include_coursework.join(', ')}`); }
+    for (const e of rs.education) { const p = get(e.ref); L.push(`- **${p.institution}**, ${p.degree}${p.field ? ` in ${p.field}` : ''}${dateRange(p) ? ` (${dateRange(p)})` : ''}${p.gpa && profile.preferences?.show_gpa !== false ? `, GPA ${p.gpa}` : ''}`); if ((e.include_coursework ?? []).length) L.push(`  - Coursework: ${e.include_coursework.join(', ')}`); }
     L.push('');
   }
   if ((rs.experience ?? []).length) {
@@ -408,6 +409,16 @@ function renderResume(profile, rs) {
   if ((rs.projects ?? []).length) {
     L.push('## Projects');
     for (const e of rs.projects) { const p = get(e.ref); L.push(`- **${p.name}**${(p.technologies ?? []).length ? ` (${p.technologies.join(', ')})` : ''}${p.url ? ` - ${p.url}` : ''}`); for (const b of e.bullets ?? []) L.push(`  - ${str(b.text)}`); }
+    L.push('');
+  }
+  if ((rs.certifications ?? []).length) {
+    L.push('## Certifications');
+    for (const e of rs.certifications) { const p = get(e.ref); L.push(`- **${p.name}**${p.issuer ? `, ${p.issuer}` : ''}${p.date ? ` (${p.date})` : ''}`); }
+    L.push('');
+  }
+  if ((rs.achievements ?? []).length) {
+    L.push('## Achievements');
+    for (const e of rs.achievements) { const p = get(e.ref); L.push(`- **${p.name}**${p.date ? ` (${p.date})` : ''}${p.description ? ` - ${p.description}` : ''}`); for (const b of e.bullets ?? []) L.push(`  - ${str(b.text)}`); }
     L.push('');
   }
   if ((rs.skills ?? []).length) { L.push('## Skills', rs.skills.join(', '), ''); }
@@ -422,7 +433,7 @@ function renderAnswers(appId, job, answers) {
   return L.join('\n');
 }
 
-function renderReview({ appId, v, job, pkg, sources, open, gaps, now, pdfs }) {
+function renderReview({ appId, v, job, pkg, sources, open, gaps, now, pdfs, template }) {
   const L = [`# Review package: ${job.company} - ${job.title}`, '', '> PREPARED, NOT SUBMITTED. Nothing has been sent, emailed or uploaded.', '',
     `- Application: ${appId} (version ${v}), job ${job.job_id}`, `- Source URL: ${job.source_url}`, `- Apply URL: ${job.apply_url || '(none recorded)'}`, `- Deadline: ${job.deadline || '(none recorded)'}`, `- Prepared at: ${now}`, '',
     '## Requirements and evidence', '', '| Level | Requirement | Status | Evidence |', '|---|---|---|---|',
@@ -431,7 +442,7 @@ function renderReview({ appId, v, job, pkg, sources, open, gaps, now, pdfs }) {
     '## Gaps (not claimed anywhere in the documents)', '', ...(gaps.length ? gaps.map((g) => `- ${g}`) : ['- none identified']), '',
     '## Declarations and eligibility questions', '', ...((pkg.answers ?? []).filter((a) => a.kind !== 'general').map((a) => `- [${a.kind}] ${str(a.question)} -> ${str(a.answer) || 'NEEDS USER INPUT'} (${str(a.source) || 'no source'})`)), ...((pkg.answers ?? []).some((a) => a.kind !== 'general') ? [] : ['- none in the package']), '',
     '## Needs the user', '', ...(open.length ? open.map((o) => `- ${o}`) : ['- nothing open']), '',
-    '## PDF files (the ones to upload)', '', ...Object.entries(pdfs).map(([k, x]) => `- ${k}.pdf: ${x.pages} page(s), made with ${x.engine}${k === 'resume' && x.pages > 1 ? ' - longer than one page; an internship resume is usually one page' : ''}`), '',
+    '## PDF files (the ones to upload)', '', ...(template ? [`- template: ${template.title} (${template.name}, ${template.source})`] : []), ...Object.entries(pdfs).map(([k, x]) => `- ${k}.pdf: ${x.pages} page(s), made with ${x.engine}${k === 'resume' && x.pages > 1 ? ' - longer than one page; an internship resume is usually one page' : ''}`), '',
     '## Uncertainties', '', `- Posting last verified: ${job.last_verified_at || 'never'}`, ...(job.unverified_fields ? [`- Unverified job fields: ${job.unverified_fields}`] : []), ...(job.uncertainties ? [`- ${job.uncertainties}`] : []),
     ...sources.map((s) => `- Description source: ${s.origin}${s.url ? ` (${s.url})` : ''}${s.fetched_at ? `, ${s.fetched_at}` : ''}${s.stale ? ' - STALE or unverified, refresh before relying on it' : ''}`), ''];
   return L.join('\n');
@@ -452,6 +463,8 @@ export function prepare(dir, appId, pkg, { now = isoNow() } = {}) {
     if (!sources.length) throw new RefusedError(`the job description for ${job.job_id} is unavailable: jobs.csv holds no qualifications_text or eligibility_text and none was supplied. Re-open ${job.source_url} and run set-description, or ask the user to paste the posting. Requirements are never invented.`);
     const inputs = readInputs(dir, appId);
     const errs = checkPackage(pkg, { profile, job, sources, inputs });
+    let template = null;
+    try { template = loadTemplate(templateName(pkg, profile), dir); } catch (e) { errs.push(`template: ${e.message}`); }
     if (errs.length) throw new Error(`package refused; nothing was written:\n${errs.map((e) => `  - ${e}`).join('\n')}`);
 
     const answers = pkg.answers ?? [];
@@ -463,11 +476,14 @@ export function prepare(dir, appId, pkg, { now = isoNow() } = {}) {
     const resumeMd = renderResume(profile, pkg.resume), letterMd = renderLetter(profile, job, pkg.cover_letter, now);
     // The PDFs are made first: if they cannot be, nothing is written.
     let pdfs;
-    try { pdfs = makePdfs({ resume: resumeMd, 'cover-letter': letterMd }, { names: { resume: `${profile.identity.full_name} - Resume`, 'cover-letter': `${profile.identity.full_name} - Cover letter` } }); }
+    const get = (ref) => resolveRef(profile, ref).value;
+    const resumeHtml = renderResumeHtml(profile, pkg.resume, template, get);
+    const letterHtml = renderLetterHtml(profile, template, { date: now.slice(0, 10), greeting: str(pkg.cover_letter.greeting) || 'Hiring Team', paragraphs: pkg.cover_letter.paragraphs.map(str) });
+    try { pdfs = makePdfs({ resume: { html: resumeHtml }, 'cover-letter': { html: letterHtml } }); }
     catch (e) { throw new RefusedError(`${e.message}. Nothing was written; the resume must be a PDF to be uploaded.`); }
     const files = {
       'resume.md': resumeMd, 'cover-letter.md': letterMd,
-      'answers.md': renderAnswers(appId, job, answers), 'review.md': renderReview({ appId, v, job, pkg, sources, open, gaps, now, pdfs }),
+      'answers.md': renderAnswers(appId, job, answers), 'review.md': renderReview({ appId, v, job, pkg, sources, open, gaps, now, pdfs, template }),
     };
     if (pkg.recruiter_message) {
       const rm = pkg.recruiter_message;
@@ -478,7 +494,7 @@ export function prepare(dir, appId, pkg, { now = isoNow() } = {}) {
     for (const [n, t] of Object.entries(files)) { writeText(join(vd, n), t); hashes[n] = sha(t.endsWith('\n') ? t : `${t}\n`); }
     for (const [k, x] of Object.entries(pdfs)) { writeAtomic(join(vd, `${k}.pdf`), x.pdf); hashes[`${k}.pdf`] = sha(x.pdf); }
     const meta = readMeta(dir, appId, v);
-    Object.assign(meta, { prepared_at: now, files: hashes, essential_gaps: essentialGaps, open_items: open.length, recruiter_draft: pkg.recruiter_message ? rel('drafts', `${appId}-v${v}-recruiter-message.md`) : null,
+    Object.assign(meta, { prepared_at: now, template: { name: template.name, source: template.source }, files: hashes, essential_gaps: essentialGaps, open_items: open.length, recruiter_draft: pkg.recruiter_message ? rel('drafts', `${appId}-v${v}-recruiter-message.md`) : null,
       pdf: Object.fromEntries(Object.entries(pdfs).map(([k, x]) => [k, { engine: x.engine, pages: x.pages }])) });
     writeText(join(vd, 'meta.json'), JSON.stringify(meta, null, 2));
     writeText(join(vd, 'package.json'), JSON.stringify(pkg, null, 2));
@@ -522,6 +538,37 @@ export function review(dir, appId, version = null) {
     modified_since_prepared: changed.length ? changed : null,
     warning: changed.length ? `${changed.join(', ')} changed after preparation: any earlier approval is void; run prepare again or show the user the edited files` : null,
     documents: docs, recruiter_draft: draft,
-    pdf_files: { resume: rel('tailored', appId, `v${v}`, 'resume.pdf'), cover_letter: rel('tailored', appId, `v${v}`, 'cover-letter.pdf'), details: meta.pdf ?? null },
+    pdf_files: { resume: rel('tailored', appId, `v${v}`, 'resume.pdf'), cover_letter: rel('tailored', appId, `v${v}`, 'cover-letter.pdf'), details: meta.pdf ?? null, template: meta.template ?? null },
   };
+}
+
+// ---------------------------------------------------------------- resume templates
+
+/**
+ * Renders the confirmed profile (every confirmed entry and bullet, all confirmed skills) in one template, to compare
+ * templates before choosing. Writes template-previews/<name>.pdf in the data directory. Touches no tracker file.
+ */
+export function previewTemplate(dir, name, { now = isoNow() } = {}) {
+  const profile = readJson(join(dir, 'candidate-profile.json'));
+  const ready = checkReadiness(profile);
+  if (!ready.ready) throw new RefusedError(`profile not ready: ${ready.missing.join('; ')}`);
+  const template = loadTemplate(name, dir);
+  const ok = (e) => CONFIRMED.includes(e?.provenance);
+  const refs = (list) => (profile[list] ?? []).map((e, i) => [e, i]).filter(([e]) => ok(e));
+  const withBullets = (list, field) => refs(list).map(([e, i]) => ({ ref: `${list}[${i}]`, bullets: (e[field] ?? []).map((t) => ({ text: t })) }));
+  const rs = {
+    education: refs('education').map(([, i]) => ({ ref: `education[${i}]` })),
+    experience: withBullets('experience', 'highlights'),
+    projects: withBullets('projects', 'highlights'),
+    certifications: refs('certifications').map(([, i]) => ({ ref: `certifications[${i}]` })),
+    achievements: refs('achievements').map(([, i]) => ({ ref: `achievements[${i}]` })),
+    skills: refs('skills').map(([e]) => e.name),
+  };
+  const get = (ref) => resolveRef(profile, ref).value;
+  const html = renderResumeHtml(profile, rs, template, get);
+  const pdfs = makePdfs({ resume: { html } });
+  const out = join(dir, 'template-previews', `${template.name}.pdf`);
+  mkdirSync(join(dir, 'template-previews'), { recursive: true });
+  writeAtomic(out, pdfs.resume.pdf);
+  return { template: template.name, title: template.title, source: template.source, file: rel('template-previews', `${template.name}.pdf`), pages: pdfs.resume.pages, engine: pdfs.resume.engine, created_at: now };
 }

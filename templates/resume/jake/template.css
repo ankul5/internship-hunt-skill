@@ -1,0 +1,37 @@
+/* Jake's Resume, ported from LaTeX to CSS. Original: https://github.com/jakegut/resume (MIT, see LICENSE). */
+@page { size: Letter; margin: 0.5in 0.55in; }
+body { font-family: "CMU Serif", "Latin Modern Roman", "Computer Modern", "Cambria", "Times New Roman", serif; font-size: 10.5pt; line-height: 1.22; color: #000; }
+
+.r-header { text-align: center; margin-bottom: 4pt; }
+.r-name { font-size: 25pt; font-weight: 700; font-variant: small-caps; letter-spacing: .01em; margin: 0 0 3pt; line-height: 1; }
+.r-contact { font-size: 9.5pt; }
+.r-contact-item { text-decoration: underline; text-underline-offset: 1.5pt; }
+.r-contact-item:nth-child(3), .r-contact-item:nth-child(5) { text-decoration: none; } /* phone and location are not links */
+
+.r-section { margin-top: 7pt; }
+.r-title { font-size: 13pt; font-weight: 400; font-variant: small-caps; letter-spacing: .02em; margin: 0 0 4pt; padding-bottom: 1pt; border-bottom: .6pt solid #000; }
+
+.r-entry { margin: 0 0 4pt 9pt; }
+.r-row-1 { font-size: 10.5pt; }
+.r-row-1 .r-org { font-weight: 700; }
+.r-row-2 { font-size: 9.5pt; font-style: italic; }
+.r-row-2 .r-role { font-style: italic; }
+.r-right { font-size: 9.5pt; }
+.r-row-1 .r-right { font-style: normal; }
+.r-tech { font-style: italic; font-weight: 400; font-size: 9.5pt; }
+.r-projects .r-row-1 .r-right { font-size: 9pt; }
+.r-note { font-size: 9.5pt; margin: 1pt 0 0 0; }
+
+.r-bullets { margin: 2pt 0 0 0; padding-left: 15pt; font-size: 9.5pt; }
+.r-bullets li { margin: 0 0 1.2pt; padding-left: 1pt; }
+.r-bullets li::marker { font-size: 7pt; }
+
+.r-skills { margin-left: 9pt; font-size: 9.5pt; }
+.r-skill-row { margin-bottom: 1pt; }
+.r-skill-cat { font-weight: 700; }
+
+/* Cover letter in the same style */
+.r-letter { font-size: 11pt; line-height: 1.45; }
+.r-letter .r-header { margin-bottom: 18pt; padding-bottom: 6pt; border-bottom: .6pt solid #000; }
+.r-letter p { margin: 0 0 10pt; }
+.r-date { margin-bottom: 14pt !important; }

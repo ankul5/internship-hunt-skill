@@ -37,7 +37,7 @@ Google's consent screen for a personal project shows an "unverified app" notice;
 
 ## 4. Public sources and other tools
 
-`node scripts/integrations-store.mjs probe ats-feeds` and `probe freehire` make a few read-only requests to public endpoints and record the result. Browser automation and Drive are tested with one harmless read and recorded with `set-integration`. LinkedIn, Indeed, Naukri, Glassdoor: no automation; see the platform matrix. Do not bypass logins, CAPTCHAs, rate limits or terms.
+`node scripts/integrations-store.mjs probe ats-feeds`, `probe freehire` and `probe career-walk` make a few read-only requests to public endpoints and record the result; `probe pdf` renders a test PDF locally (nothing leaves the computer). Browser automation and Drive are tested with one harmless read and recorded with `set-integration`. LinkedIn, Indeed, Naukri, Glassdoor: no automation; see the platform matrix. Do not bypass logins, CAPTCHAs, rate limits or terms.
 
 ## 5. Report
 

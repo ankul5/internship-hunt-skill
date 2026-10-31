@@ -1,0 +1,11 @@
+{
+  "title": "Jake's Resume",
+  "description": "The widely used one-page software-engineering layout: centred small-caps name, ruled small-caps section headings, title and dates on one line, organisation and location in italics below. Serif. Best for software, data and engineering internships.",
+  "license": "MIT",
+  "attribution": "HTML/CSS port of Jake's Resume by Jake Gutierrez (https://github.com/jakegut/resume, MIT License, see LICENSE in this folder), itself based on https://github.com/sb2nov/resume.",
+  "section_order": ["education", "experience", "projects", "skills", "certifications", "achievements"],
+  "section_titles": { "skills": "Technical Skills" },
+  "skills_style": "grouped",
+  "experience_lead": "title",
+  "contact_separator": " | "
+}

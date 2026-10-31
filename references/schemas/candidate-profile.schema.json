@@ -32,7 +32,8 @@
             "countries": {"type": "array", "items": {"type": "string"}},
             "needs_sponsorship": {"type": ["boolean", "null"]}
           }
-        }
+        },
+        "languages": {"type": "array", "items": {"type": "string"}, "description": "Optional. Languages the user can work in, in their words."}
       }
     },
     "education": {
@@ -108,6 +109,30 @@
         }
       }
     },
+    "achievements": {
+      "type": "array",
+      "description": "Optional. Awards, hackathon results, scholarships, in the user's words.",
+      "items": {
+        "type": "object",
+        "required": ["name", "provenance"],
+        "properties": {
+          "name": {"type": "string"},
+          "description": {"type": ["string", "null"]},
+          "date": {"type": ["string", "null"]},
+          "provenance": {"type": "string", "enum": ["resume", "user_stated", "inferred_unconfirmed"]}
+        }
+      }
+    },
+    "outreach": {
+      "type": "object",
+      "description": "Optional. How recruiter messages are written and sent. Follow-up timing lives in preferences.json (followup-store set-prefs).",
+      "properties": {
+        "pitch": {"type": ["string", "null"], "description": "One-line introduction confirmed by the user; confirmed facts only"},
+        "tone": {"type": ["string", "null"]},
+        "sender_email": {"type": ["string", "null"]},
+        "signature": {"type": ["string", "null"]}
+      }
+    },
     "resume": {
       "type": "object",
       "required": ["source_path", "parsed_at"],
@@ -130,7 +155,13 @@
         "min_stipend_text": {"type": ["string", "null"]},
         "industries": {"type": "array", "items": {"type": "string"}},
         "excluded_companies": {"type": "array", "items": {"type": "string"}},
-        "deal_breakers": {"type": "array", "items": {"type": "string"}}
+        "deal_breakers": {"type": "array", "items": {"type": "string"}},
+        "employment_types": {"type": "array", "items": {"type": "string"}, "description": "Optional. Full-time internship, Part-time internship, Freelance or contract, Apprenticeship or trainee"},
+        "weekly_hours_max": {"type": ["integer", "null"], "description": "Optional. For part-time roles"},
+        "relocation": {"type": ["string", "null"], "description": "Optional. The user's words"},
+        "company_types": {"type": "array", "items": {"type": "string"}, "description": "Optional. Early-stage startups, Growth-stage startups, Large companies / MNCs"},
+        "show_gpa": {"type": ["boolean", "null"], "description": "Optional. false hides GPA/CGPA on tailored resumes"},
+        "resume_template": {"type": ["string", "null"], "pattern": "^[a-z0-9][a-z0-9_-]{0,39}$", "description": "Optional. Resume template name: a built-in (jake, harvard, modern) or a folder in <data dir>/resume-templates/. null uses jake"}
       }
     },
     "provenance": {

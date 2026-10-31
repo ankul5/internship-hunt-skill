@@ -12,6 +12,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { dataDir, isoNow } from './lib/data.mjs';
+import { createWalker } from './lib/walker.mjs';
 
 const args = process.argv.slice(2);
 const cmd = args.shift();
@@ -31,6 +32,8 @@ function agentReach(...a) {
 }
 
 const norm = (s) => String(s ?? '').replace(/\s+/g, ' ').trim().toLowerCase();
+const alnum = (s) => String(s ?? '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+const CORP = /\b(inc|llc|llp|ltd|limited|pvt|private|corp|corporation|gmbh|co|plc)\b\.?/g;
 
 function collect() {
   const queries = flagAll('--query');
@@ -99,8 +102,11 @@ function check() {
     const removed = [];
     for (const f of TEXT_FIELDS) {
       if (j[f] == null || j[f] === '') continue;
+      // A re-check of a recorded job (career-walk verify): its title and company come from jobs.csv, not from this page.
+      if (j.existing_job_id && (f === 'title' || f === 'company')) continue;
       const v = norm(j[f]);
       if (haystack.includes(v) || (f === 'apply_url' && v === norm(j.source_url))) continue;
+      if (f === 'company' && alnum(v.replace(CORP, '')).length >= 2 && alnum(haystack).includes(alnum(v.replace(CORP, '')))) continue;
       if (llmHay.includes(v)) { removed.push(f); problems.push({ source_url: j.source_url, field: f, value: j[f], reason: 'only in LLM-extracted text (ScrapeGraphAI); kept, marked unverified', kept: true }); continue; }
       problems.push({ source_url: j.source_url, field: f, value: j[f], reason: 'value not found in any provider text' });
       delete j[f]; removed.push(f);
@@ -146,14 +152,18 @@ function addPage() {
 
 // Fetch one page with Scrapling's plain Fetcher (scripts/scrapling_fetch.py) and record it.
 //   scrapling <bundle.json> <url>
-function scrapling() {
+async function scrapling() {
   const [bundleFile, url] = args;
   if (!bundleFile || !url) { console.error('usage: scrapling <bundle.json> <url>'); process.exit(1); }
+  // Same rule as the career-page walker: robots.txt must allow the page (a missing robots.txt allows it).
+  if (!(await createWalker().allowed(url))) { out({ ok: false, url, provider: 'scrapling', error: 'ROBOTS_DISALLOWED: robots.txt does not allow this page (or could not be read); not fetched' }); process.exit(1); }
   const py = process.env.SCRAPLING_PYTHON || join(homedir(), '.venvs', 'scrapling', process.platform === 'win32' ? 'Scripts/python.exe' : 'bin/python');
   const r = spawnSync(py, ['-I', join(import.meta.dirname, 'scrapling_fetch.py'), url], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: 120000 });
   let res;
   try { res = JSON.parse(r.stdout.trim().split('\n').pop()); } catch { res = { ok: false, error: r.error?.message || r.stderr?.slice(0, 300) || 'no output' }; }
   if (!res.ok) { out({ ok: false, url, provider: 'scrapling', error: res.error }); process.exit(1); }
+  // An error page (404 "not found", 403, 5xx) is not the posting: nothing is added, and the status is reported.
+  if (!(res.status >= 200 && res.status < 400)) { out({ ok: false, url, provider: 'scrapling', http_status: res.status, error: `HTTP ${res.status}: not recorded as page text${[404, 410].includes(res.status) ? ' (the posting is gone: ingest it with closed: true)' : ''}` }); process.exit(1); }
   out({ ok: true, ...addText(bundleFile, url, 'scrapling', res.text, false), http_status: res.status });
 }
 
@@ -161,7 +171,7 @@ try {
   if (cmd === 'collect') collect();
   else if (cmd === 'check') check();
   else if (cmd === 'add-page') addPage();
-  else if (cmd === 'scrapling') scrapling();
+  else if (cmd === 'scrapling') await scrapling();
   else { console.error('usage: agent-reach-search.mjs collect [--query q]... | scrapling <bundle> <url> | add-page <bundle> <url> <provider> <file> [--llm] | check <ingest.json> <bundle.json> [--fix out.json]'); process.exit(1); }
 } catch (e) { console.error(e.message); process.exit(1); }
 

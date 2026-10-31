@@ -1,0 +1,33 @@
+/* Modern single-column template. Original CSS for this project (MIT). */
+@page { size: A4; margin: 13mm 15mm; }
+body { font-family: "Segoe UI", "Calibri", "Helvetica Neue", Arial, sans-serif; font-size: 9.8pt; line-height: 1.32; color: #1d232b; }
+
+.r-header { margin-bottom: 6pt; padding-bottom: 6pt; border-bottom: 2pt solid #1f4e79; }
+.r-name { font-size: 24pt; font-weight: 600; color: #1f4e79; margin: 0 0 2pt; letter-spacing: -.01em; }
+.r-contact { font-size: 9pt; color: #4a5560; }
+.r-sep { color: #9aa5b1; }
+
+.r-section { margin-top: 9pt; }
+.r-title { font-size: 9.5pt; font-weight: 700; color: #1f4e79; text-transform: uppercase; letter-spacing: .07em; margin: 0 0 4pt; }
+
+.r-entry { margin: 0 0 6pt; }
+.r-row-1 .r-org { font-weight: 600; font-size: 10.3pt; color: #111; }
+.r-row-2 { color: #39434d; }
+.r-row-2 .r-role { font-style: normal; font-weight: 500; }
+.r-right { color: #6b7681; font-size: 9pt; }
+.r-tech { color: #4a5560; font-weight: 400; font-size: 9pt; }
+.r-note { font-size: 9.3pt; color: #39434d; }
+
+.r-bullets { margin: 2.5pt 0 0; padding-left: 13pt; }
+.r-bullets li { margin: 0 0 1.6pt; }
+.r-bullets li::marker { color: #1f4e79; }
+
+.r-skills { font-size: 9.5pt; }
+.r-skill-row { margin-bottom: 1.6pt; }
+.r-skill-cat { font-weight: 600; color: #111; }
+
+/* Cover letter */
+.r-letter { font-size: 10.8pt; line-height: 1.5; }
+.r-letter .r-header { margin-bottom: 18pt; }
+.r-letter p { margin: 0 0 10pt; }
+.r-date { color: #4a5560; margin-bottom: 14pt !important; }

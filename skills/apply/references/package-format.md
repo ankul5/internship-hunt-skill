@@ -33,6 +33,8 @@ Input for `node scripts/apply-store.mjs prepare <app_id> <package.json>`. UTF-8 
 }
 ```
 
+`template` (optional, top level) names the resume template for this application's PDFs, for example `"template": "harvard"`; without it the profile's `preferences.resume_template` is used, else `jake`. See `templates/resume/README.md`.
+
 `recruiter_message` is optional and only when the user asked. Use `"user_provided": true` instead of `contact_source_url` for an address the user gave.
 
 ## Rules the helper enforces

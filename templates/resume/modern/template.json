@@ -1,0 +1,11 @@
+{
+  "title": "Modern (clean sans-serif)",
+  "description": "A contemporary single-column layout: large left-aligned name, a thin accent rule, letter-spaced accent section headings, dates aligned right in grey. Sans-serif, A4. Suits startups, product and design-adjacent engineering roles. Still plain text for application systems.",
+  "license": "MIT (this repository)",
+  "attribution": "Original CSS for this project.",
+  "section_order": ["experience", "projects", "education", "skills", "certifications", "achievements"],
+  "section_titles": {},
+  "skills_style": "grouped",
+  "experience_lead": "title",
+  "contact_separator": "  ·  "
+}

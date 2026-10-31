@@ -3,8 +3,7 @@ name: internship-agent
 description: Entry point and router for the internship search agent. Use when the user wants to find, verify, rank, apply to, or track internships, manage their candidate profile, or resume an earlier internship-search session. Reads local state, enforces the safety gates, and decides the next step.
 compatibility: Run with the repository root as the working directory. Uses only file read/write and, when available, web search and browsing tools.
 metadata:
-  version: "0.1"
-  status: foundation-stub
+  version: "0.2"
 ---
 
 # Internship agent (router)
@@ -23,7 +22,9 @@ This is the router. Implemented workflow skills: `profile-setup` (resume and pre
 | User intent | Next step |
 |---|---|
 | Add or update resume / skills / preferences; `run-search` says the profile is not ready | `profile-setup` |
-| Find or refresh internships | Use the `run-search` skill |
+| What is missing from my profile? | `profile-setup` (`node scripts/profile-store.mjs gaps --text`) |
+| Find or refresh internships, startups, or a company's career page | Use the `run-search` skill (feeds, startup discovery, career-page walk) |
+| Approve a job the user picked | If it is `discovered`, verify it first (`run-search` section 8: `career-walk.mjs verify <job_id> --save`); then `apply-store.mjs approve-job <job_id> --note "<user's words>"` |
 | Read a public page, search the public web, or extract details from one permitted page | `run-search` (see its `references/reading-pages.md`: Agent Reach, official feeds, Scrapling, ScrapeGraphAI; installs need the user's agreement) |
 | Install or check Agent Reach | `run-search` (`references/agent-reach-install.md`; public content only; install needs the user's agreement) |
 | What is connected? Connect Gmail, a connector or a browser | `integrations` |

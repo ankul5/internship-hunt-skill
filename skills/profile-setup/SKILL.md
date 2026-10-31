@@ -3,7 +3,7 @@ name: profile-setup
 description: Build or update the candidate profile (candidate-profile.json) from the user's resume and answers, so run-search has a confirmed profile to score against. Use when the user wants to set up, add, or update their resume, skills, education, experience, projects, or internship preferences (roles, locations, remote type, start dates, work authorization), or when run-search reports the profile is not ready. Saves only facts the user confirmed. Never searches, applies, or messages anyone.
 compatibility: Needs the repository root as working directory and Node 18+ for scripts/profile-store.mjs. Reads the resume with the harness's file reader (PDF, DOCX text, or plain text) or from pasted text.
 metadata:
-  version: "0.1"
+  version: "0.2"
 ---
 
 # Profile setup
@@ -33,13 +33,25 @@ From the resume text, list candidates for `education`, `experience`, `projects`,
 
 ## 4. Ask the preferences the user has not given (automatic)
 
-After the resume facts are confirmed, always run `node scripts/profile-store.mjs questions`. It lists every preference question that is not yet answered in the profile, as ready-made choice cards in `batches` of up to 4. Skip this only when `unanswered` is empty.
+After the resume facts are confirmed, always run `node scripts/profile-store.mjs questions`. It lists every setup question that is not yet answered in the profile, as ready-made choice cards in `batches` of up to 4. Skip this only when `unanswered` is empty. There are 22 cards in four groups (each card's `stage`):
+
+- **search**: roles, job types (full-time, part-time, freelance, apprenticeship), weekly hours for part-time, locations, work mode, relocation, industries, company types (startups or large companies), work authorization, exclusions;
+- **scoring**: start dates, duration, stipend;
+- **apply**: certifications and awards not on the resume, whether to show CGPA, resume template (look), languages;
+- **outreach**: one-line pitch, tone, sending address, signature, follow-up timing.
+
+Ask every batch; do not stop after the first two. The user can skip any card.
 
 - Ask each batch with the harness's multiple-choice question tool (in Claude Code, `AskUserQuestion`, passing the cards' `question`, `header`, `multiSelect` and `options`). Without such a tool, ask the same questions as a short numbered list. The user can always type their own answer ("Other").
 - Do not ask what the user already told you in chat; use that answer instead.
 - Write exactly what the user chose or typed into the fields named in each card's `maps_to`. Dates must be exact (`YYYY-MM-DD`): if the answer is vague ("next summer"), ask for the dates or leave them null. Do not guess.
 - Mark every question the user answered **or skipped** by adding its `answered_by` key to the top-level `provenance` map with `user_stated` (leave the field empty or null if they skipped or chose "Flexible", "Any" or "Nothing"). That is what stops the question being asked again.
-- `target_roles` is required for search: if the user will not choose any, say `/run-search` cannot run without it.
+- `target_roles` is required for search: if the user will not choose any, say `/run-search` cannot run without it. If the resume points at other roles too (for example ML projects but only "Software engineering" chosen), ask once whether to add them.
+- Start dates: turn "Right away" or "Next summer" into exact dates **with** the user (for example "from 2026-11-01 to 2026-12-15, is that right?"); never fill them silently.
+- Certifications and awards: when the user lists them, add `certifications[]` (name, issuer, date) or `achievements[]` (name, description, date) entries with `provenance: "user_stated"`, in their exact words.
+- Pitch: draft one sentence from confirmed facts only, show it, and save it to `outreach.pitch` only after the user confirms or edits it.
+- Follow-up timing is saved by `node scripts/followup-store.mjs set-prefs --after-days N --note "<user's words>"`; also add `outreach.follow_up` to `provenance`.
+- "No" to relocation also adds "Roles needing relocation" to `deal_breakers`, and "Paid only" adds "Unpaid roles": scoring turns those two phrases into real checks.
 - If the user declines work authorization, leave it empty and say eligibility checks will be limited. Expected graduation year comes from the confirmed `education[].end_date`.
 
 Run `questions` again later (for example from `/run-search`) to catch anything still unanswered; it only returns unanswered ones.
@@ -53,4 +65,6 @@ Write the full profile JSON to a file in the private data directory (for example
 
 ## 6. Report
 
-Run `node scripts/search-store.mjs ready` and tell the user whether `/run-search` can run now, and what is still missing. List the `open_questions`. Do not start a search or any application.
+Run `node scripts/search-store.mjs ready` and tell the user whether `/run-search` can run now. Then run `node scripts/profile-store.mjs gaps --text`: it lists what is still missing for each stage (search, scoring, apply, outreach, submit) and the `open_questions`. Tell the user the gaps in plain words and offer to fill them now. Do not start a search or any application.
+
+Run `gaps` again whenever the user asks what is missing, or before `/apply` and `/contact-recruiter`. The profile can be updated at any time: `show`, change only what the user changes, `save` (the old file is backed up first).

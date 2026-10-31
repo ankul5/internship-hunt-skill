@@ -11,11 +11,13 @@ A hard failure is never offset by a good fit score: the score is left empty, the
 
 | Gate | Fails when | Unknown when |
 |---|---|---|
-| Employment type | `employment_type` is `other` (for example a full-time senior role) | `unknown` |
+| Employment type | `employment_type` is `other` (for example a full-time senior role). A part-time role passes when `preferences.employment_types` includes part-time and the title or the feed's employment label says part-time | `unknown` |
 | Excluded company | company is in `preferences.excluded_companies` | never |
 | Graduation year | posting lists accepted years and the profile's latest confirmed `education[].end_date` year is not among them | profile has no confirmed graduation date |
 | Work authorization | posting lists countries and none is in `identity.work_authorization.countries` | profile has none confirmed |
-| Deal-breaker | a `preferences.deal_breakers` term appears (whole word) in title, eligibility, qualifications, or stipend text | never |
+| Deal-breaker | a `preferences.deal_breakers` term appears (whole word) in title, eligibility, qualifications, or stipend text. Two card answers are checks instead: "Unpaid roles" fails when that text says unpaid; "Roles needing relocation" fails for an onsite or hybrid role whose location names none of the user's places (below) | never; relocation is not checked when the work mode or location is unknown |
+
+**Places.** The user's places are the first part of each `preferences.locations` entry without "near", "around" or "in": "Near Pune, India" gives `pune`, "Anywhere in India" gives `india`. Entries such as "Remote only" or "Anywhere in my country" give none. Location fit (below) uses the same places.
 
 Result: any fail → `fail`; else any unknown → `unknown`; else at least one pass → `pass`; else `unknown`. Requirements the posting does not state are not checked, so `pass` means "no stated requirement is violated", not "guaranteed eligible". `unknown` means a stated requirement could not be confirmed against the profile; ask the user.
 

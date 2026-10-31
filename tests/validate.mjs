@@ -54,7 +54,7 @@ const required = [
   'skills/run-search/references/ingest-format.md', 'skills/run-search/references/sources.md', 'skills/run-search/references/scrapegraph.md', 'skills/run-search/references/scrapling.md', 'references/contact-discovery.md',
   'skills/run-search/references/agent-reach-install.md', 'skills/agent-reach/SKILL.md',
   'references/scoring-rubric.md', 'scripts/search-store.mjs', 'scripts/lib/csv.mjs', 'scripts/lib/data.mjs', 'scripts/lib/scoring.mjs', 'scripts/lib/ingest.mjs',
-  'tests/search.test.mjs', 'plan.md',
+  'tests/search.test.mjs', 'LICENSE', 'README.md',
 ];
 section('required files exist', required.filter((p) => !existsSync(join(root, p))).map((p) => `missing ${p}`));
 
@@ -187,7 +187,7 @@ if (git('rev-parse', '--is-inside-work-tree').stdout?.trim() !== 'true') {
   const files = git('ls-files', '-co', '--exclude-standard').stdout.split('\n').filter(Boolean);
   const textExt = /\.(md|json|csv|mjs|ps1|sh|txt|yml|yaml|toml|gitignore|gitattributes|example)$/i;
   const errs = [];
-  for (const f of files.filter((x) => x !== 'tests/validate.mjs' && !x.startsWith('vendor/') && (textExt.test(x) || !x.includes('.')))) {
+  for (const f of files.filter((x) => x !== 'tests/validate.mjs' && !x.startsWith('vendor/') && existsSync(join(root, x)) && (textExt.test(x) || !x.includes('.')))) {
     const body = text(f);
     for (const m of body.matchAll(/[A-Za-z0-9._%+-]+@([A-Za-z0-9.-]+\.[A-Za-z]{2,})/g)) {
       if (!/(^|\.)example\.(com|org|net)$/i.test(m[1])) errs.push(`${f}: non-example email address "${m[0]}"`);
@@ -200,7 +200,7 @@ if (git('rev-parse', '--is-inside-work-tree').stdout?.trim() !== 'true') {
 
   // ---------- 5. markdown links ----------
   const linkErrs = [];
-  for (const f of files.filter((x) => x.endsWith('.md'))) {
+  for (const f of files.filter((x) => x.endsWith('.md') && existsSync(join(root, x)))) {
     for (const m of text(f).matchAll(/\]\(([^)\s#]+)(?:#[^)]*)?\)/g)) {
       const target = m[1];
       if (/^[a-z]+:/i.test(target)) continue;

@@ -1,9 +1,9 @@
 ---
 name: run-search
-description: The `/run-search` pipeline. Agent Reach searches for internships, Scrapling extracts more from accessible job pages, results are normalized, deduplicated, verified, scored against the confirmed profile and resume, and saved to jobs.csv. The user then reviews and approves opportunities before any application is prepared. Also the place for reading one public page or searching the web (provider chain: Agent Reach, official feeds, Scrapling, ScrapeGraphAI). Use when the user asks to search, find, refresh, or look for new internships, a role, an industry, remote or local openings, or recently posted opportunities, or to read a public posting or page. Never applies or messages anyone.
+description: The `/run-search` pipeline. Agent Reach searches for internships, Scrapling extracts more from accessible job pages, employer job-board feeds, startup discovery and a career-page walker read companies' own pages, results are normalized, deduplicated, verified, scored against the confirmed profile and resume, and saved to jobs.csv. Also re-opens saved postings to verify them before approval. The user then reviews and approves opportunities before any application is prepared. Also the place for reading one public page or searching the web (provider chain: Agent Reach, official feeds, Scrapling, ScrapeGraphAI). Use when the user asks to search, find, refresh, or look for new internships, startups or company career pages, a role, an industry, remote or local openings, or recently posted opportunities, to verify a job, or to read a public posting or page. Never applies or messages anyone.
 compatibility: Needs the repository root as working directory, Node 18+ for scripts/search-store.mjs, and Agent Reach (preferred), or another web search, fetch, browser, or connector tool in the harness. Reports honestly when none is available.
 metadata:
-  version: "0.2"
+  version: "0.3"
   rubric: "1"
 ---
 
@@ -58,8 +58,34 @@ node scripts/feed-search.mjs ats greenhouse:<slug> lever:<slug> ashby:<name>
 ```
 
 - **`freehire`** queries the public freehire.me API (no key; personal, non-commercial use; reference: `references/integrations.md`). It aggregates postings crawled from employers' own boards. Defaults to `employment_type=internship`; add facets with `--param`. Useful ones: `work_mode=remote`, `countries=IN`, `regions=global`, `collections=yc` (also `techstars`, `a16z-portfolio`, `indian-roots`), `company_type=startup`, `employment_type=part_time`, `category=...`, `skills=...`; values are listed in the API's facet table. These records are an aggregator's copy: they ingest as `discovered`, `opened_source: false`. Open the `source_url` before treating one as verified (refresh mode does this).
-- **`ats`** reads one employer's own Greenhouse, Lever or Ashby feed and keeps titles matching intern, trainee, apprentice, fresher, co-op, part-time or student (override with `--match`). The feed entry is the employer's own page data, so those records ingest as `verified` with the notes saying so. The company list is `companies.txt` in the data directory: add only boards you have seen work. A name without `=Company` is derived from the slug and flagged in `uncertainties`.
+- **`ats`** reads one employer's own Greenhouse, Lever, Ashby, SmartRecruiters or Workable feed and keeps titles matching intern, trainee, apprentice, fresher, co-op, part-time or student (override with `--match`). The feed entry is the employer's own page data, so those records ingest as `verified` with the notes saying so (SmartRecruiters lists without descriptions: up to 20 matching postings are fetched one by one; the rest stay `discovered`). The company list is `companies.txt` in the data directory: add only boards you have seen work. A name without `=Company` is derived from the slug and flagged in `uncertainties`.
 - For a "remote internships, global and India-based startups" request run: `freehire --param work_mode=remote`, `freehire --param countries=IN`, `freehire --param collections=yc`, `freehire --param company_type=startup --param work_mode=remote`, then `ats --file`. Use `--pages` for more than 50 results; the API refuses paging past 10,000 results.
+
+## 1b. Startups and employers' own career pages
+
+Platforms list only part of what is open. Two more ways in, both reading the employer's own pages:
+
+**Startup discovery (grows `companies.txt`).** Run when the user wants startups, when `preferences.company_types` mentions startups, or about once a week:
+
+```
+node scripts/feed-search.mjs discover [--collections yc,techstars,indian-roots,a16z-portfolio] [--param countries=IN] [--max-probe 25]
+```
+
+It finds startups with internship listings in freehire's startup collections, works out each one's own job board from the listing (`greenhouse:<slug>` and so on), checks that the board answers (one read-only request each), and writes `board-suggestions-<time>.json` with ids `B1`, `B2`... Show the user the boards (company, collections, how many internship postings the board has now). **Add only the ones the user picks**, with their words:
+
+```
+node scripts/feed-search.mjs add-boards <board-suggestions.json> --pick B1,B4 --note "<user's words>"
+```
+
+It skips boards that did not answer or are already listed, backs up `companies.txt`, and appends the rest with a dated comment. The suggestions also list `leads_with_site`: startups on other systems whose own website is known; walk those (below).
+
+**Career-page walk.** For employers whose site the user names, the leads above, or the sites of Agent Reach web-search results:
+
+```
+node scripts/career-walk.mjs find "<Company>=<https://site>"... [--file <data dir>/career-sites.txt] [--from-bundle <agent-reach bundle>] [--save]
+```
+
+It finds the careers page from the site's own links (then `/careers`, `/jobs`...), detects the job board behind it and reads internship postings through the board's public API, or else opens internship links on the careers page itself. JavaScript-only pages are read once more through Agent Reach. It writes a bundle and an ingest draft like the feeds, plus board suggestions for `add-boards`. `--save` runs the check and the ingest of sections 2 to 7 itself. Each site's report says what was reached and why nothing was found (no careers page, robots.txt, 429, JavaScript); repeat those in your report. Limits and rules: `references/reading-pages.md` (provider 2b).
 - Record each command's outcome as a search. A `429` means stop and report it; never retry in a loop or switch IPs.
 - Glassdoor, LinkedIn, Indeed and Naukri are not feeds: see `skills/run-search/references/sources.md`.
 
@@ -94,15 +120,25 @@ Do not edit the CSVs yourself.
 - Exit 2: refused (profile not ready, or another run holds the lock). Tell the user; never clear a lock without asking.
 - Exit 1: validation or format error, nothing was written. Fix the input or report the error.
 
-## 8. Refresh mode
+## 8. Refresh mode and verifying before approval
 
-Run `node scripts/search-store.mjs list verified,discovered,shortlisted`, reopen each `source_url`, and ingest what you saw with the same `source_url` (set `closed` when it is gone). If a page cannot be reached, do not ingest it; mention it in the search `notes` and the report. The helper never overwrites user-owned statuses (`shortlisted`, `applied`, `archived`, a user's `rejected`).
+Only a `verified` job can be approved (`apply-store.mjs approve-job`). Aggregator records (freehire) and search snippets arrive as `discovered`. To verify, re-open the postings:
+
+```
+node scripts/career-walk.mjs verify <job_id>... --save          # the jobs the user wants to approve
+node scripts/career-walk.mjs verify --status discovered --save  # refresh: every unverified job (--limit 20 by default)
+node scripts/career-walk.mjs verify --status verified,shortlisted --save   # refresh: are approved jobs still open?
+```
+
+It reads the posting from the job board's public API when the URL is a known board (also a Greenhouse posting embedded in an employer page), otherwise the page itself. Outcomes: `verified` (the live text contains the title; the notes say how it was read), `closed` (404/410, a closed notice, or the board no longer lists it: the job becomes `expired`), `unverified` (page reached but too little text or no title; stays `discovered` with the reason), `not_reached` (network, robots.txt, 429: nothing is changed). `--save` runs the fact check and the ingest. The helper never overwrites user-owned statuses (`shortlisted`, `applied`, `archived`, a user's `rejected`), and `applied` or `archived` jobs are not re-opened.
+
+Then, and only with the user's words: `node scripts/apply-store.mjs approve-job <job_id> --note "<user's words>"`.
 
 ## 9. Report and approval gate
 
 From the helper's output, tell the user: sources searched (with query and status), results found, new records, updated/unchanged and duplicate counts, inaccessible sources with the error, skipped items with reasons, unverified listings, expired and auto-rejected listings (with the eligibility reason), and the top matches (title, company, score, link, any uncertainties). State the defaults you applied and that scores are not predictions of interview outcomes.
 
-Then ask the user to review the list and say which jobs they approve. **Nothing is prepared or applied for until the user approves specific jobs.** Do not start tailoring or applications on your own.
+Then ask the user to review the list and say which jobs they approve. **Nothing is prepared or applied for until the user approves specific jobs.** Do not start tailoring or applications on your own. For an approved job that is still `discovered`, verify it first (section 8), then record the approval.
 
 ## 10. Reading one page, or searching the web without recording jobs
 

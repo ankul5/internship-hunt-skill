@@ -43,10 +43,14 @@ export const REGISTRY = [
   { id: 'google-drive', name: 'Google Drive (resume import)', kind: 'tool', integration: 'google-drive', fallback: 'requires_account_authorization',
     enable: ['The Drive connector shows as connected in Claude, but it has not been exercised here. Ask the user to name one resume file, read it once, and record: node scripts/submit-store.mjs set-integration google-drive --status verified --notes "<what you did>".'],
     ask: ['Is the resume in Google Drive, or should they give a local file path instead?'] },
-  { id: 'ats-feeds', name: 'Employer career-page feeds (Greenhouse, Lever, Ashby)', kind: 'network', integration: 'ats-feeds', probe: 'ats', fallback: 'requires_configuration',
-    enable: ['No account needed. Run: node scripts/integrations-store.mjs probe ats-feeds  (three read-only requests).'], ask: [] },
-  { id: 'freehire', name: 'freehire.me public job search', kind: 'network', integration: 'freehire', probe: 'freehire', fallback: 'requires_configuration',
+  { id: 'ats-feeds', name: 'Employer job-board feeds (Greenhouse, Lever, Ashby, SmartRecruiters, Workable)', kind: 'network', integration: 'ats-feeds', probe: 'ats', fallback: 'requires_configuration',
+    enable: ['No account needed. Run: node scripts/integrations-store.mjs probe ats-feeds  (five read-only requests).'], ask: [] },
+  { id: 'freehire', name: 'freehire.me public job search (also used for startup discovery)', kind: 'network', integration: 'freehire', probe: 'freehire', fallback: 'requires_configuration',
     enable: ['No account needed. Run: node scripts/integrations-store.mjs probe freehire  (one read-only request). Personal, non-commercial use only.'], ask: [] },
+  { id: 'career-walk', name: 'Career-page walker (this repository\'s own fetcher)', kind: 'network', integration: 'career-walk', probe: 'career-walk', fallback: 'requires_configuration',
+    enable: ['No account needed. Run: node scripts/integrations-store.mjs probe career-walk  (reads one public careers page, honouring robots.txt). Pages that need JavaScript return too little text; read those with Agent Reach or the browser.'], ask: [] },
+  { id: 'pdf', name: 'PDF output (headless Chrome or Edge on this computer)', kind: 'local', integration: 'pdf', probe: 'pdf', fallback: 'requires_configuration',
+    enable: ['Needs Chrome or Edge installed (or INTERNSHIP_AGENT_BROWSER set to one). Run: node scripts/integrations-store.mjs probe pdf  (renders a one-line test PDF locally; nothing leaves the computer).'], ask: [] },
 ];
 
 const fill = (steps, sdir) => steps.map((s) => s.replace('{client_file}', paths(sdir).client));
@@ -168,9 +172,10 @@ export function renderChecklist(r) {
 const UA = 'internship-agent-personal/0.1 (personal job search; read-only)';
 const getJson = async (fetchImpl, url) => { const res = await fetchImpl(url, { headers: { 'User-Agent': UA, Accept: 'application/json' } }); if (!res.ok) throw new Error(`HTTP ${res.status} from ${new URL(url).host}`); return res.json(); };
 
-export async function probe(dir, which, { fetchImpl = fetch, now = isoNow(), sleep = (ms) => new Promise((r) => setTimeout(r, ms)) } = {}) {
+export async function probe(dir, which, { fetchImpl = fetch, now = isoNow(), sleep = (ms) => new Promise((r) => setTimeout(r, ms)), pdfImpl = null } = {}) {
   if (which === 'ats-feeds') {
-    const checks = [['greenhouse', 'https://boards-api.greenhouse.io/v1/boards/stripe/jobs', (j) => Array.isArray(j.jobs)], ['lever', 'https://api.lever.co/v0/postings/palantir?mode=json&limit=1', (j) => Array.isArray(j)], ['ashby', 'https://api.ashbyhq.com/posting-api/job-board/notion', (j) => Array.isArray(j.jobs)]];
+    const checks = [['greenhouse', 'https://boards-api.greenhouse.io/v1/boards/stripe/jobs', (j) => Array.isArray(j.jobs)], ['lever', 'https://api.lever.co/v0/postings/palantir?mode=json&limit=1', (j) => Array.isArray(j)], ['ashby', 'https://api.ashbyhq.com/posting-api/job-board/notion', (j) => Array.isArray(j.jobs)],
+      ['smartrecruiters', 'https://api.smartrecruiters.com/v1/companies/PHONEPELIMITED/postings?limit=1', (j) => Array.isArray(j.content)], ['workable', 'https://apply.workable.com/api/v1/widget/accounts/apna', (j) => Array.isArray(j.jobs)]];
     const ok = [], bad = [];
     for (const [name, url, valid] of checks) {
       try { (valid(await getJson(fetchImpl, url)) ? ok : bad).push(name); } catch (e) { bad.push(`${name} (${e.message})`); }
@@ -182,7 +187,18 @@ export async function probe(dir, which, { fetchImpl = fetch, now = isoNow(), sle
     try { const j = await getJson(fetchImpl, 'https://freehire.me/api/v1/jobs/search?employment_type=internship&limit=1'); if (!Array.isArray(j.data)) throw new Error('unexpected response shape'); return setIntegration(dir, 'freehire', 'verified', `search returned ${j.meta?.total ?? '?'} internships`, now); }
     catch (e) { return setIntegration(dir, 'freehire', 'unsupported_or_unverified', `failed: ${e.message}`, now); }
   }
-  throw new Error('probe target must be ats-feeds or freehire');
+  if (which === 'career-walk') {
+    const { createWalker } = await import('./walker.mjs');
+    const r = await createWalker({ fetchImpl, sleep }).get('https://job-boards.greenhouse.io/stripe');
+    return setIntegration(dir, 'career-walk', r.ok && r.text.length > 200 ? 'verified' : 'unsupported_or_unverified',
+      r.ok ? `read ${r.url} (${r.text.length} characters of text, robots.txt allowed it)` : `failed: ${r.code} ${r.error}`, now);
+  }
+  if (which === 'pdf') {
+    const { makePdfs } = await import('./pdf.mjs');
+    try { const r = (pdfImpl ?? makePdfs)({ resume: '# Test\n\nOne line.' }).resume; return setIntegration(dir, 'pdf', 'verified', `made a ${r.pages}-page test PDF with ${r.engine}`, now); }
+    catch (e) { return setIntegration(dir, 'pdf', 'unsupported_or_unverified', `failed: ${e.message}`, now); }
+  }
+  throw new Error('probe target must be ats-feeds, freehire, career-walk or pdf');
 }
 
 // ---------------------------------------------------------------- platform matrix

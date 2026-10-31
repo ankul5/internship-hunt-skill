@@ -1,0 +1,11 @@
+{
+  "title": "Harvard (career-office classic)",
+  "description": "The conservative format university career offices recommend: centred name and contact line, centred bold section headings with a rule, organisation and location on the first line, role and dates in italics below, education first. Serif. Suits any field, including consulting, finance and research.",
+  "license": "MIT (this repository)",
+  "attribution": "Original CSS for this project, following the widely published Harvard Office of Career Services resume guidelines (reverse-chronological, education first, one page). Not affiliated with Harvard University.",
+  "section_order": ["education", "experience", "projects", "achievements", "certifications", "skills"],
+  "section_titles": { "experience": "Experience", "projects": "Projects", "achievements": "Leadership & Awards", "skills": "Skills & Interests" },
+  "skills_style": "grouped",
+  "experience_lead": "organization",
+  "contact_separator": " • "
+}

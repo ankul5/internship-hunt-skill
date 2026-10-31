@@ -83,11 +83,16 @@ let engine = browserEngine;
 /** Tests replace the engine with a stub. Production always uses the browser engine. */
 export function setPdfEngine(fn) { engine = fn ?? browserEngine; }
 
-/** Renders { resume, 'cover-letter' } Markdown to PDFs. Throws an Error if any cannot be made; never returns a partial set. */
+/**
+ * Renders { resume, 'cover-letter' } to PDFs. Each value is Markdown (plain built-in styling) or { html } already
+ * rendered by a resume template. Throws an Error if any cannot be made; never returns a partial set.
+ */
 export function makePdfs(docs, { names = {} } = {}) {
   const out = {};
-  for (const [kind, md] of Object.entries(docs)) {
-    const html = wrapHtml(mdToHtml(md), { title: names[kind] ?? kind, kind: kind === 'resume' ? 'resume' : 'letter' });
+  for (const [kind, doc] of Object.entries(docs)) {
+    const html = typeof doc === 'object' && doc && typeof doc.html === 'string'
+      ? doc.html
+      : wrapHtml(mdToHtml(doc), { title: names[kind] ?? kind, kind: kind === 'resume' ? 'resume' : 'letter' });
     const r = engine({ html, kind });
     if (!r?.ok || !isPdf(r.pdf)) throw new Error(`PDF for ${kind} could not be made: ${r?.error ?? 'the engine returned no valid PDF'}`);
     out[kind] = { pdf: r.pdf, engine: r.engine, pages: pdfPages(r.pdf) };

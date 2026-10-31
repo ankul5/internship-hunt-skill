@@ -1,17 +1,18 @@
 # Setup
 
-Status: foundation only. One stub skill (`internship-agent`) exists; the workflow skills are not built yet. Windows paths are shown first; macOS/Linux equivalents follow.
+The short version is in the [README quick start](../README.md#quick-start). This page has the details. Windows paths are shown first; macOS/Linux equivalents follow.
 
 ## Prerequisites
 
 - git (needed for project-root detection by Kimi Code, and for the ignore checks)
-- Node 18+ (only to run `tests/validate.mjs`)
+- Node 18+ (the helper scripts and tests; no dependencies to install)
+- Chrome or Edge (used headless to make the resume and cover letter PDFs)
 - At least one harness: Claude Code, OpenAI Codex, or Kimi Code
 
 ## 1. Get the repository and run setup
 
 ```powershell
-git clone <repository-url> internship-hunt-skill
+git clone https://github.com/ankul5/internship-hunt-skill.git
 cd internship-hunt-skill
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1      # add -Copy to copy instead of linking
 node tests\validate.mjs
@@ -41,7 +42,7 @@ The agent must run with this repository as the working directory, because skills
 
 ## 3. First run check
 
-Ask the harness to run the skill. Expected: it reads `AGENTS.md`, locates the private data directory, reads `sync-state.json`, and reports that workflow skills are not implemented yet. If it does not list the skill, see [compatibility.md](compatibility.md#troubleshooting).
+Ask the harness to run the skill. Expected: it reads `AGENTS.md`, locates the private data directory, reads `sync-state.json`, and offers the next step (usually `/profile-setup`). If it does not list the skill, see [compatibility.md](compatibility.md#troubleshooting).
 
 ## Where your data goes
 

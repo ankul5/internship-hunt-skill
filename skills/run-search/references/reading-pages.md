@@ -13,7 +13,8 @@ Try in this order and stop at the first that returns the data you need.
 | # | Provider | How | Details |
 |---|---|---|---|
 | 1 | **Agent Reach** (main provider) | `agent-reach read <url>`, `agent-reach <channel> <action>`, `agent-reach channels`; for search runs `node scripts/agent-reach-search.mjs collect` | Used exactly as its upstream skill defines (`skills/agent-reach/SKILL.md`; no extra limits from this project). Pinned commit, install, verify, remove: [agent-reach-install.md](agent-reach-install.md) |
-| 2 | **Official connectors and feeds** | Any authorized API, feed or MCP connector configured in this session that permits the read (for example the employer feeds in `scripts/feed-search.mjs`) | Use only what is actually present; check `references/integrations.md` |
+| 2 | **Official connectors and feeds** | Any authorized API, feed or MCP connector configured in this session that permits the read (for example the employer job-board feeds in `scripts/feed-search.mjs`: Greenhouse, Lever, Ashby, SmartRecruiters, Workable) | Use only what is actually present; check `references/integrations.md` |
+| 2b | **Career-page walker** (this repository's own fetcher) | `node scripts/career-walk.mjs find <site>` for an employer's careers page; `node scripts/career-walk.mjs verify <job_id>` to re-open a recorded posting | Plain GET with an identifying User-Agent, robots.txt honoured, one request per second per host, a host is left alone after a 429. Bounded, not a crawler: at most 6 fetches to locate a careers page and 15 posting pages per company. A page it reached that needs JavaScript is read once more through Agent Reach (`--no-render` turns that off); pages behind a login, a robots.txt rule or a block are reported, never worked around |
 | 3 | **Scrapling** | Plain fetcher or plain browser render, parsed with CSS/XPath | [scrapling.md](scrapling.md) |
 | 4 | **ScrapeGraphAI** | LLM-based field extraction, only if selectors are impractical | [scrapegraph.md](scrapegraph.md); the user must accept the LLM trade-offs |
 
@@ -43,7 +44,7 @@ Agent Reach prints one JSON object: read `ok`, `items`, `error.code`, `error.hin
 
 - No stealth or fingerprint spoofing, Cloudflare/Turnstile or CAPTCHA solving, proxy rotation, or any feature meant to evade bot protection. Plain fetch or plain render only.
 - For Scrapling and ScrapeGraphAI: no login, no reuse of the user's cookies or saved sessions, no login-gated pages (LinkedIn, social networks, member directories).
-- No crawling, spiders, or following links in bulk.
+- No crawling, spiders, or following links in bulk. The career-page walker's fixed per-company limits (above) are the only link following, and only on the employer's own site or its job board.
 - Never harvest people's emails, names or profile IDs from directories, profiles or lists, and never guess or construct addresses. Contacts follow `references/contact-discovery.md`.
 - ScrapeGraphAI: set `SCRAPEGRAPHAI_TELEMETRY_ENABLED=false`, prefer local Ollama, keep any API key in an environment variable, and do not use the vendors' managed cloud APIs or their proxy/anti-bot features.
 

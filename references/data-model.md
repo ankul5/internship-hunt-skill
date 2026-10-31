@@ -20,14 +20,18 @@ This page holds the rules that the schemas cannot express. `node tests/validate.
 | `candidate-profile.json` | the candidate (single document) | none |
 | `sync-state.json` | cursors, lock, integration status, check-updates coverage (`updates`) | none |
 | `preferences.json` | follow-up timing the user approved (`follow_up`); created by `followup-store.mjs set-prefs` | none |
+| `companies.txt` | employer job boards searched by `feed-search.mjs ats --file` (`provider:slug=Company`); grown only through `add-boards` with the user's words | none |
+| `career-sites.txt` | optional: employer sites for `career-walk.mjs find --file` (`Company=https://site`) | none |
 
-Blank copies are in `templates/data/`; fictional examples are in `tests/fixtures/`.
+Blank copies are in `templates/data/`; fictional examples are in `tests/fixtures/`. Search runs also leave working files beside these: `search-bundle-*.json` (what each provider returned), `ingest-*.json` and `*.checked.json` (drafts before and after the fact check), and `board-suggestions-*.json` (startup boards awaiting the user's choice). They hold only public posting text and can be deleted once ingested.
 
 Folders the helpers keep in the private data directory: `updates/check-log.jsonl` (every update check and why its checkpoint moved or not), `tracker/repair-plan-<time>.json` and `tracker/audit.jsonl` (proposed and applied repairs), `.pending-write.json` (present only while a multi-file write is in progress, or after it was interrupted).
 
 ### Schema versions
 
 - **2** (2026-10-28): `email-events.csv` `kind` gains `follow_up`. Existing files stay valid; no migration needed. `sync-state.json` gains the optional `updates` object.
+- 2026-10-30, `candidate-profile.json` (still `schema_version` 1, additive only): optional `achievements[]`, `outreach` (`pitch`, `tone`, `sender_email`, `signature`), `identity.languages`, and `preferences.employment_types`, `weekly_hours_max`, `relocation`, `company_types`, `show_gpa`. Older profiles stay valid; `profile-store.mjs questions` asks for the new fields.
+- 2026-10-31, `candidate-profile.json` (still `schema_version` 1, additive only): optional `preferences.resume_template` (a built-in template name or a folder in `<data dir>/resume-templates/`). Tailored versions' `meta.json` records `template`. Preview PDFs go to `<data dir>/template-previews/`.
 
 ## Format conventions
 

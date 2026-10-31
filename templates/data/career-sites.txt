@@ -1,0 +1,3 @@
+# Employer websites for: node scripts/career-walk.mjs find --file <this file>
+# One per line: Company Name=https://company-site  (or a careers URL such as https://example.com/careers)
+# The walker finds the careers page, the job board behind it, and internship postings. Public pages only.

@@ -151,7 +151,7 @@ export function ingest(dir, input, opts = {}) {
         return rc === kc && rt === kt && (!rl || !kl);
       });
 
-      const evalExtras = { eligibility: j.eligibility, skills: j.skills, keywords: j.keywords, industry: j.industry };
+      const evalExtras = { eligibility: j.eligibility, skills: j.skills, keywords: j.keywords, industry: j.industry, employment_label: str(j.employment_label) };
       const missingNote = (rec) => ['location', 'deadline', 'stipend_text', 'eligibility_text'].filter((k) => !rec[k]).map((k) => k.replace('_text', '')).join(', ');
       const uncertainty = (rec) => [str(j.uncertainties), ...extra, missingNote(rec) ? `not stated: ${missingNote(rec)}` : ''].filter(Boolean).join('; ');
       const closedNow = (rec) => j.closed === true || (rec.deadline && rec.deadline < today);

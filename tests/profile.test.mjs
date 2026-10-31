@@ -63,8 +63,8 @@ test('attach-resume then save: profile becomes ready, backup made on second save
 test('questions: blank profile gets all cards in batches of 4; answered ones are not asked again', () => {
   const dir = makeDir();
   const first = JSON.parse(run(dir, 'questions').stdout);
-  assert.equal(first.unanswered.length, 8);
-  assert.deepEqual(first.batches.map((b) => b.length), [4, 4]);
+  assert.equal(first.unanswered.length, 22);
+  assert.deepEqual(first.batches.map((b) => b.length), [4, 4, 4, 4, 4, 2]);
   for (const q of first.batches.flat()) {
     assert.ok(q.options.length >= 2 && q.options.length <= 4 && q.header.length <= 12, q.field);
   }
@@ -72,7 +72,7 @@ test('questions: blank profile gets all cards in batches of 4; answered ones are
   p.provenance = { 'preferences.target_roles': 'user_stated', 'preferences.min_stipend_text': 'user_stated' };
   writeFileSync(join(dir, 'candidate-profile.json'), JSON.stringify(p));
   const second = JSON.parse(run(dir, 'questions').stdout);
-  assert.equal(second.unanswered.length, 6);
+  assert.equal(second.unanswered.length, 20);
   assert.ok(!second.unanswered.includes('target_roles') && !second.unanswered.includes('stipend'));
 });
 

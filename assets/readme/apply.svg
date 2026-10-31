@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 330" width="1200" height="330" role="img" aria-labelledby="t d">
+  <title id="t">How /apply keeps it honest</title>
+  <desc id="d">The posting and your confirmed profile flow into a requirement check and a fact check. A made-up claim such as "led a team of 10" is stopped at the fact check. Checked content is rendered in your resume template to one-page PDFs, then shown to you for review. Nothing is sent from /apply.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b1220"/><stop offset="1" stop-color="#16233b"/></linearGradient>
+    <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#475569"/></marker>
+    <style>
+      .h{font:700 16px 'Segoe UI',-apple-system,Helvetica,Arial,sans-serif;fill:#f8fafc;text-anchor:middle}
+      .s{font:400 13px 'Segoe UI',-apple-system,Helvetica,Arial,sans-serif;fill:#94a3b8;text-anchor:middle}
+      .box{fill:#111c30;stroke:#23324b;stroke-width:1.5}
+      .flow{fill:none;stroke:#2dd4bf;stroke-width:2.5;stroke-dasharray:6 10;animation:f 1.2s linear infinite}
+      @keyframes f{to{stroke-dashoffset:-16}}
+      .base{fill:none;stroke:#334155;stroke-width:2.5}
+    </style>
+  </defs>
+  <rect width="1200" height="330" rx="20" fill="url(#bg)"/>
+  <text x="600" y="46" class="h" style="font-size:22px">How /apply keeps it honest</text>
+
+  <!-- inputs -->
+  <rect class="box" x="30" y="90" width="170" height="70" rx="12"/><text x="115" y="120" class="h">The posting</text><text x="115" y="142" class="s">re-read, saved</text>
+  <rect class="box" x="30" y="190" width="170" height="70" rx="12"/><text x="115" y="220" class="h">Your profile</text><text x="115" y="242" class="s">confirmed facts only</text>
+
+  <!-- checks -->
+  <rect class="box" x="280" y="90" width="190" height="70" rx="12"/><text x="375" y="120" class="h">Requirement check</text><text x="375" y="142" class="s">every quote is in the posting</text>
+  <rect class="box" x="280" y="190" width="190" height="70" rx="12" style="stroke:#2dd4bf;stroke-opacity:.6"/><text x="375" y="220" class="h">Fact check</text><text x="375" y="242" class="s">no new numbers, tools, verbs</text>
+
+  <rect class="box" x="560" y="140" width="170" height="70" rx="12"/><text x="645" y="170" class="h">Your template</text><text x="645" y="192" class="s">jake · harvard · modern</text>
+  <rect class="box" x="810" y="140" width="160" height="70" rx="12"/><text x="890" y="170" class="h">One-page PDFs</text><text x="890" y="192" class="s">real, selectable text</text>
+  <rect class="box" x="1040" y="140" width="135" height="70" rx="12" style="stroke:#fbbf24;stroke-opacity:.7"/><text x="1107" y="170" class="h" style="fill:#fbbf24">You review</text><text x="1107" y="192" class="s">nothing is sent</text>
+
+  <!-- connectors -->
+  <path class="base" d="M200 125 H280"/><path class="flow" d="M200 125 H280"/>
+  <path class="base" d="M200 225 H280"/><path class="flow" d="M200 225 H280"/>
+  <path class="base" d="M470 125 C 515 125, 515 175, 560 175"/><path class="flow" d="M470 125 C 515 125, 515 175, 560 175"/>
+  <path class="base" d="M470 225 C 515 225, 515 175, 560 175"/><path class="flow" d="M470 225 C 515 225, 515 175, 560 175"/>
+  <path class="base" d="M730 175 H810"/><path class="flow" d="M730 175 H810"/>
+  <path class="base" d="M970 175 H1040"/><path class="flow" d="M970 175 H1040"/>
+
+  <!-- a made-up claim bounces off the fact check -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" dur="6s" repeatCount="indefinite" values="0 0;0 0;150 0;150 0;60 40;60 40" keyTimes="0;.1;.4;.45;.7;1"/>
+    <animate attributeName="opacity" dur="6s" repeatCount="indefinite" values="0;1;1;1;0;0" keyTimes="0;.1;.4;.5;.7;1"/>
+    <rect x="70" y="276" width="150" height="30" rx="15" fill="#3b1218" stroke="#f87171"/>
+    <text x="145" y="296" class="s" style="fill:#fecaca">"led a team of 10"</text>
+  </g>
+  <g opacity="0">
+    <animate attributeName="opacity" dur="6s" repeatCount="indefinite" values="0;0;1;1;0;0" keyTimes="0;.4;.43;.68;.72;1"/>
+    <circle cx="375" cy="290" r="14" fill="#f87171"/>
+    <path d="M369 284 l12 12 M381 284 l-12 12" stroke="#0b1220" stroke-width="3" stroke-linecap="round"/>
+    <text x="400" y="295" class="s" style="fill:#fca5a5;text-anchor:start">refused: not in your profile</text>
+  </g>
+</svg>

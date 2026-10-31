@@ -51,6 +51,26 @@ function weeksFrom(text) {
   return [a, b];
 }
 
+/** Place names from location preferences: "Near Pune, India" -> "pune"; "Anywhere in India" -> "india". */
+export function homePlaces(profile) {
+  const raw = [...(profile.preferences?.locations ?? [])];
+  return [...new Set(raw.map((l) => norm(String(l).split(/[,(]/)[0]).replace(/^(near|around|in|close to|anywhere in|within)\s+/, '').trim())
+    .filter((l) => l && !/\b(remote|my|anywhere|outside|any|only|country|city)\b/.test(l)))];
+}
+
+/** Onsite or hybrid in a place outside the user's locations. null when it cannot be told. */
+function needsRelocation(profile, job) {
+  const rt = job.remote_type ?? 'unknown';
+  const places = homePlaces(profile);
+  if (rt === 'remote') return false;
+  if (!['onsite', 'hybrid'].includes(rt) || !job.location || !places.length) return null;
+  const loc = norm(job.location);
+  if (/(^| )remote( |$)/.test(loc)) return null;
+  return !places.some((p) => loc.includes(p));
+}
+
+const wantsPartTime = (profile) => (profile.preferences?.employment_types ?? []).some((t) => /part[\s_-]?time/i.test(t));
+
 /** Hard gates. Returns { result: 'pass'|'fail'|'unknown', checks: [{name, result, detail}] }. */
 export function eligibility(profile, job) {
   const checks = [];
@@ -58,6 +78,7 @@ export function eligibility(profile, job) {
 
   const et = job.employment_type ?? 'unknown';
   if (['internship', 'co-op', 'apprenticeship'].includes(et)) add('employment type', 'pass', et);
+  else if (et === 'other' && wantsPartTime(profile) && /part[\s_-]?time/i.test(`${job.title ?? ''} ${job.employment_label ?? ''}`)) add('employment type', 'pass', 'part-time role; the profile accepts part-time');
   else if (et === 'other') add('employment type', 'fail', 'employment type is other (not an internship)');
   else add('employment type', 'unknown', 'employment type not confirmed');
 
@@ -81,6 +102,16 @@ export function eligibility(profile, job) {
   const blob = norm([job.title, job.eligibility_text, job.qualifications_text, job.stipend_text].join(' '));
   for (const term of profile.preferences?.deal_breakers ?? []) {
     const t = norm(term);
+    // The preference cards' answers are phrases ("Unpaid roles", "Roles needing relocation"), so they get real checks.
+    if (/^unpaid( role| roles| internships?)?$/.test(t)) {
+      if (/(^| )unpaid( |$)/.test(blob)) add('deal-breaker', 'fail', `posting says unpaid (deal-breaker "${term}")`);
+      continue;
+    }
+    if (/relocat/.test(t)) {
+      const r = needsRelocation(profile, job);
+      if (r === true) add('deal-breaker', 'fail', `${job.remote_type} role in ${job.location}, outside ${homePlaces(profile).join('/')} (deal-breaker "${term}")`);
+      continue;
+    }
     if (t && new RegExp(`(^| )${t}( |$)`).test(blob)) add('deal-breaker', 'fail', `posting text contains deal-breaker "${term}"`);
   }
 
@@ -121,10 +152,10 @@ export function fitScore(profile, job) {
 
   // location / work arrangement
   const prefTypes = profile.preferences?.remote_types ?? [];
-  const prefLocs = (profile.preferences?.locations ?? []).map(norm);
+  const prefLocs = homePlaces(profile);
   const rt = job.remote_type ?? 'unknown';
   if ((prefTypes.length || prefLocs.length) && (rt !== 'unknown' || job.location)) {
-    const locHit = job.location && prefLocs.some((l) => norm(job.location).includes(l) || l.includes(norm(job.location)));
+    const locHit = job.location && prefLocs.some((l) => norm(job.location).includes(l));
     let f;
     if (rt === 'remote') f = !prefTypes.length || prefTypes.includes('remote') ? 1 : 0;
     else if (rt !== 'unknown' && prefTypes.length && !prefTypes.includes(rt)) f = 0;
