@@ -1,17 +1,23 @@
 <p align="center">
-  <img src="assets/readme/hero.svg" alt="Internship Hunt. A resume card travels through search, verify, score and tailor, and ends at your approval. Find, verify, tailor and track internships from Claude Code. Your data stays on your machine. Nothing is sent without your yes." width="100%">
+  <img src="assets/readme/logo.svg" width="150" alt="Internship Hunt logo: a geometric maroon fox wearing a gold magnifying-glass monocle">
+</p>
+
+<h1 align="center">Internship Hunt</h1>
+
+<p align="center">
+  <em>The fox does the searching. You make the decisions.</em>
 </p>
 
 <p align="center">
   <a href="https://github.com/ankul5/internship-hunt-skill/actions/workflows/ci.yml"><img src="https://github.com/ankul5/internship-hunt-skill/actions/workflows/ci.yml/badge.svg" alt="CI" height="20"></a>
   &nbsp;
-  <a href="https://claude.com/claude-code"><img src="https://img.shields.io/badge/built_for-Claude_Code-2dd4bf?style=flat" alt="Built for Claude Code" height="20"></a>
+  <a href="https://claude.com/claude-code"><img src="https://img.shields.io/badge/built_for-Claude_Code-7a1f2b?style=flat" alt="Built for Claude Code" height="20"></a>
   &nbsp;
-  <a href="https://agentskills.io/specification"><img src="https://img.shields.io/badge/format-Agent_Skills-60a5fa?style=flat" alt="Agent Skills" height="20"></a>
+  <a href="https://agentskills.io/specification"><img src="https://img.shields.io/badge/format-Agent_Skills-3b6fb6?style=flat" alt="Agent Skills" height="20"></a>
   &nbsp;
-  <img src="https://img.shields.io/badge/node-18%2B-334155?style=flat&logo=node.js&logoColor=white" alt="Node 18+" height="20">
+  <img src="https://img.shields.io/badge/node-18%2B-1c1c24?style=flat&logo=node.js&logoColor=white" alt="Node 18+" height="20">
   &nbsp;
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2dd4bf?style=flat" alt="MIT license" height="20"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-c9a24a?style=flat" alt="MIT license" height="20"></a>
 </p>
 
 <p align="center">
@@ -32,6 +38,10 @@
   <a href="#safety-and-privacy"><b>Safety</b></a>
 </p>
 
+<p align="center">
+  <img src="assets/readme/hero.svg" alt="Every listing is checked before you see it. A job board is scanned and each listing is stamped: verified, expired, a match scored 82, or skipped as a templated page. The match then waits for your approval." width="100%">
+</p>
+
 > [!NOTE]
 > An independent open-source project, not affiliated with or endorsed by Anthropic. Claude Code is named only because it is the tool this workflow runs in.
 
@@ -40,7 +50,7 @@
 A folder of [Agent Skills](https://agentskills.io/specification): plain-language instructions your coding agent follows, plus small Node scripts for the parts a language model should not be trusted with (IDs, deduplication, scoring, fact checks, approvals, safe CSV writes). There is no website, server or account. Your profile, jobs and applications are CSV and JSON files in a private folder that Git ignores.
 
 <p align="center">
-  <img src="assets/readme/workflow.svg" alt="Five commands and two approval gates: /profile-setup, /run-search, you approve the jobs, /apply, you approve the exact package, /submit-application or /contact-recruiter, then /check-updates." width="100%">
+  <img src="assets/readme/workflow.svg" alt="Five commands, two gates: a gold cursor steps through /profile-setup, /run-search, you approve the jobs, /apply, you approve the exact package, /submit-application or /contact-recruiter, and /check-updates." width="100%">
 </p>
 
 ## See it run
@@ -170,7 +180,7 @@ Run `/integrations` at any time to see what is connected and to connect what is 
 ## How /apply works
 
 <p align="center">
-  <img src="assets/readme/apply.svg" alt="The posting and your confirmed profile go through a requirement check and a fact check. A made-up claim like 'led a team of 10' is refused. Checked content is rendered in your template to one-page PDFs, and you review them. Nothing is sent from /apply." width="100%">
+  <img src="assets/readme/apply.svg" alt="Facts from the posting and your profile drop through a fact-check sieve. Real facts fall through and become resume lines; the made-up claim 'led a team of 10' is stopped and refused. The resume is stamped one page with real text, for your review." width="100%">
 </p>
 
 1. **Re-read the posting** and save its text. Requirements must be quoted from it: none are invented from the job title.

@@ -1,85 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300" role="img" aria-labelledby="t d">
-  <title id="t">The workflow</title>
-  <desc id="d">Seven steps in order: /profile-setup builds your profile, /run-search finds and verifies internships, you approve the jobs you want, /apply tailors a resume and cover letter, you approve the exact package, /submit-application and /contact-recruiter send it, and /check-updates watches for replies. A pulse travels along the steps; the two approval steps are marked with a lock.</desc>
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b1220"/><stop offset="1" stop-color="#16233b"/></linearGradient>
-    <linearGradient id="ac" gradientUnits="userSpaceOnUse" x1="90" y1="0" x2="1110" y2="0"><stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#60a5fa"/></linearGradient>
-    <style>
-      .cmd{font:700 15px 'Cascadia Code',Consolas,'SF Mono',Menlo,monospace;fill:#e2e8f0;text-anchor:middle}
-      .sub{font:400 13px 'Segoe UI',-apple-system,Helvetica,Arial,sans-serif;fill:#94a3b8;text-anchor:middle}
-      .gate{font:700 13px 'Segoe UI',-apple-system,Helvetica,Arial,sans-serif;fill:#fbbf24;text-anchor:middle}
-      .card{fill:#111c30;stroke:#23324b;stroke-width:1.5}
-    </style>
-  </defs>
-  <rect width="1200" height="300" rx="20" fill="url(#bg)"/>
-
-  <line x1="90" y1="110" x2="1110" y2="110" stroke="#23324b" stroke-width="3"/>
-  <line x1="90" y1="110" x2="1110" y2="110" stroke="url(#ac)" stroke-width="3" pathLength="1" stroke-dasharray="1 1">
-    <animate attributeName="stroke-dashoffset" values="1;0;0" keyTimes="0;.8;1" dur="9s" repeatCount="indefinite"/>
-  </line>
-  <circle r="7" cy="110" fill="#5eead4">
-    <animate attributeName="cx" values="90;1110;1110" keyTimes="0;.8;1" dur="9s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="1;1;0" keyTimes="0;.8;.85" dur="9s" repeatCount="indefinite"/>
-  </circle>
-
-  <!-- step template: node at x, lit when the pulse passes (time = (x-90)/1020*0.8) -->
-  <g>
-    <circle cx="90" cy="110" r="14" fill="#0f1a2e" stroke="#2dd4bf" stroke-width="3"/>
-    <text x="90" y="116" text-anchor="middle" font="700 13px sans-serif" fill="#5eead4" style="font:700 13px 'Segoe UI',sans-serif">1</text>
-    <rect class="card" x="20" y="150" width="140" height="90" rx="12"/>
-    <text x="90" y="182" class="cmd">/profile-setup</text>
-    <text x="90" y="204" class="sub">resume + answers</text>
-    <text x="90" y="222" class="sub">→ confirmed profile</text>
-  </g>
-  <g>
-    <circle cx="260" cy="110" r="14" fill="#0f1a2e" stroke="#334155" stroke-width="3"><animate attributeName="stroke" values="#334155;#334155;#2dd4bf;#2dd4bf;#334155" keyTimes="0;.133;.14;.95;1" dur="9s" repeatCount="indefinite"/></circle>
-    <text x="260" y="116" style="font:700 13px 'Segoe UI',sans-serif" text-anchor="middle" fill="#5eead4">2</text>
-    <rect class="card" x="190" y="150" width="140" height="90" rx="12"/>
-    <text x="260" y="182" class="cmd">/run-search</text>
-    <text x="260" y="204" class="sub">feeds, startups,</text>
-    <text x="260" y="222" class="sub">career pages, web</text>
-  </g>
-  <g>
-    <circle cx="430" cy="110" r="16" fill="#1f1a0b" stroke="#fbbf24" stroke-width="3"><animate attributeName="r" values="16;16;21;16;16" keyTimes="0;.266;.29;.32;1" dur="9s" repeatCount="indefinite"/></circle>
-    <path d="M424 109 v-4 a6 6 0 0 1 12 0 v4" fill="none" stroke="#fbbf24" stroke-width="2.4"/><rect x="421" y="109" width="18" height="11" rx="2" fill="#fbbf24"/>
-    <rect class="card" x="360" y="150" width="140" height="90" rx="12" style="stroke:#fbbf24;stroke-opacity:.5"/>
-    <text x="430" y="182" class="gate">YOU APPROVE</text>
-    <text x="430" y="204" class="sub">the jobs you want</text>
-    <text x="430" y="222" class="sub">(verified first)</text>
-  </g>
-  <g>
-    <circle cx="600" cy="110" r="14" fill="#0f1a2e" stroke="#334155" stroke-width="3"><animate attributeName="stroke" values="#334155;#334155;#2dd4bf;#2dd4bf;#334155" keyTimes="0;.4;.407;.95;1" dur="9s" repeatCount="indefinite"/></circle>
-    <text x="600" y="116" style="font:700 13px 'Segoe UI',sans-serif" text-anchor="middle" fill="#5eead4">3</text>
-    <rect class="card" x="530" y="150" width="140" height="90" rx="12"/>
-    <text x="600" y="182" class="cmd">/apply</text>
-    <text x="600" y="204" class="sub">tailored resume,</text>
-    <text x="600" y="222" class="sub">cover letter, answers</text>
-  </g>
-  <g>
-    <circle cx="770" cy="110" r="16" fill="#1f1a0b" stroke="#fbbf24" stroke-width="3"><animate attributeName="r" values="16;16;21;16;16" keyTimes="0;.533;.556;.586;1" dur="9s" repeatCount="indefinite"/></circle>
-    <path d="M764 109 v-4 a6 6 0 0 1 12 0 v4" fill="none" stroke="#fbbf24" stroke-width="2.4"/><rect x="761" y="109" width="18" height="11" rx="2" fill="#fbbf24"/>
-    <rect class="card" x="700" y="150" width="140" height="90" rx="12" style="stroke:#fbbf24;stroke-opacity:.5"/>
-    <text x="770" y="182" class="gate">YOU APPROVE</text>
-    <text x="770" y="204" class="sub">the exact package</text>
-    <text x="770" y="222" class="sub">or message</text>
-  </g>
-  <g>
-    <circle cx="940" cy="110" r="14" fill="#0f1a2e" stroke="#334155" stroke-width="3"><animate attributeName="stroke" values="#334155;#334155;#2dd4bf;#2dd4bf;#334155" keyTimes="0;.666;.673;.95;1" dur="9s" repeatCount="indefinite"/></circle>
-    <text x="940" y="116" style="font:700 13px 'Segoe UI',sans-serif" text-anchor="middle" fill="#5eead4">4</text>
-    <rect class="card" x="870" y="150" width="140" height="90" rx="12"/>
-    <text x="940" y="176" class="cmd" style="font-size:12.5px">/submit-application</text>
-    <text x="940" y="196" class="cmd" style="font-size:12.5px">/contact-recruiter</text>
-    <text x="940" y="222" class="sub">browser or Gmail</text>
-  </g>
-  <g>
-    <circle cx="1110" cy="110" r="14" fill="#0f1a2e" stroke="#334155" stroke-width="3"><animate attributeName="stroke" values="#334155;#334155;#2dd4bf;#2dd4bf;#334155" keyTimes="0;.8;.807;.95;1" dur="9s" repeatCount="indefinite"/></circle>
-    <text x="1110" y="116" style="font:700 13px 'Segoe UI',sans-serif" text-anchor="middle" fill="#5eead4">5</text>
-    <rect class="card" x="1040" y="150" width="140" height="90" rx="12"/>
-    <text x="1110" y="182" class="cmd">/check-updates</text>
-    <text x="1110" y="204" class="sub">replies, interviews,</text>
-    <text x="1110" y="222" class="sub">follow-ups</text>
-  </g>
-
-  <text x="600" y="52" text-anchor="middle" style="font:700 22px 'Segoe UI',-apple-system,Helvetica,Arial,sans-serif" fill="#f8fafc">Five commands, two approval gates</text>
-  <text x="600" y="276" text-anchor="middle" style="font:400 13px 'Segoe UI',-apple-system,Helvetica,Arial,sans-serif" fill="#64748b">/job-status and /integrations work at any time: where everything stands, and what is connected</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 290" width="1200" height="290" role="img" aria-labelledby="t d">
+<title id="t">The workflow</title>
+<desc id="d">Seven cards in order: 01 /profile-setup, 02 /run-search, you approve the jobs you want, 03 /apply, you approve the exact package, 04 /submit-application or /contact-recruiter, 05 /check-updates. A gold cursor steps from card to card. The two approval cards are maroon with a keyhole.</desc>
+<defs><style>
+.cmd{font:700 15px 'Cascadia Code',Consolas,'SF Mono',Menlo,monospace;fill:#f5efe2;text-anchor:middle}
+.sub{font:400 12.5px 'Segoe UI',-apple-system,Helvetica,Arial,sans-serif;fill:#a8a29e;text-anchor:middle}
+.num{font:700 12px 'Segoe UI',-apple-system,Helvetica,Arial,sans-serif;fill:#5b8fd6;letter-spacing:.06em}
+.gate{font:800 13px 'Segoe UI',-apple-system,Helvetica,Arial,sans-serif;fill:#f5efe2;text-anchor:middle;letter-spacing:.06em}
+.h{font:700 24px Georgia,'Times New Roman',serif;fill:#f5efe2}
+.foot{font:400 13px 'Segoe UI',-apple-system,Helvetica,Arial,sans-serif;fill:#6f6a64}
+</style></defs>
+<rect width="1200" height="290" rx="20" fill="#0e0e12"/>
+<text x="32" y="56" class="h">Five commands. Two gates. You hold the keys.</text>
+<rect x="34" y="68" width="44" height="3" rx="1.5" fill="#d4a94a"/>
+<g><rect x="32" y="92" width="140" height="128" rx="14" fill="#1c1c24" fill-opacity=".55" stroke="#2a2a33"><animate attributeName="fill-opacity" dur="10.5s" repeatCount="indefinite" values=".55;.55;1;1;.55;.55" keyTimes="0;0.0000;0.0286;0.1429;0.1529;1"/></rect>
+<text x="48" y="118" class="num">01</text>
+<text x="102" y="158" class="cmd">/profile-setup</text><text x="102" y="184" class="sub">resume + answers</text>
+<text x="102" y="202" class="sub">confirmed profile</text></g><path d="M180 149 l7 7 l-7 7" fill="none" stroke="#7a1f2b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g><rect x="198" y="92" width="140" height="128" rx="14" fill="#1c1c24" fill-opacity=".55" stroke="#2a2a33"><animate attributeName="fill-opacity" dur="10.5s" repeatCount="indefinite" values=".55;.55;1;1;.55;.55" keyTimes="0;0.1429;0.1714;0.2857;0.2957;1"/></rect>
+<text x="214" y="118" class="num">02</text>
+<text x="268" y="158" class="cmd">/run-search</text><text x="268" y="184" class="sub">boards, startups,</text>
+<text x="268" y="202" class="sub">career pages, web</text></g><path d="M346 149 l7 7 l-7 7" fill="none" stroke="#7a1f2b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g><rect x="364" y="92" width="140" height="128" rx="14" fill="#5a1520" fill-opacity=".55"><animate attributeName="fill-opacity" dur="10.5s" repeatCount="indefinite" values=".55;.55;1;1;.55;.55" keyTimes="0;0.2857;0.3143;0.4286;0.4386;1"/></rect>
+<g transform="translate(434,130)"><circle r="15" fill="none" stroke="#e8d5a6" stroke-width="2.5"/><circle cy="-3" r="4.5" fill="#e8d5a6"/><path d="M-2.5 0 h5 l1.5 9 h-8z" fill="#e8d5a6"/></g>
+<text x="434" y="172" class="gate">YOU APPROVE</text><text x="434" y="192" class="sub" style="fill:#d9c6a0">the jobs</text><text x="434" y="208" class="sub" style="fill:#d9c6a0">you want</text></g><path d="M512 149 l7 7 l-7 7" fill="none" stroke="#7a1f2b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g><rect x="530" y="92" width="140" height="128" rx="14" fill="#1c1c24" fill-opacity=".55" stroke="#2a2a33"><animate attributeName="fill-opacity" dur="10.5s" repeatCount="indefinite" values=".55;.55;1;1;.55;.55" keyTimes="0;0.4286;0.4571;0.5714;0.5814;1"/></rect>
+<text x="546" y="118" class="num">03</text>
+<text x="600" y="158" class="cmd">/apply</text><text x="600" y="184" class="sub">resume, letter,</text>
+<text x="600" y="202" class="sub">answers as PDFs</text></g><path d="M678 149 l7 7 l-7 7" fill="none" stroke="#7a1f2b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g><rect x="696" y="92" width="140" height="128" rx="14" fill="#5a1520" fill-opacity=".55"><animate attributeName="fill-opacity" dur="10.5s" repeatCount="indefinite" values=".55;.55;1;1;.55;.55" keyTimes="0;0.5714;0.6000;0.7143;0.7243;1"/></rect>
+<g transform="translate(766,130)"><circle r="15" fill="none" stroke="#e8d5a6" stroke-width="2.5"/><circle cy="-3" r="4.5" fill="#e8d5a6"/><path d="M-2.5 0 h5 l1.5 9 h-8z" fill="#e8d5a6"/></g>
+<text x="766" y="172" class="gate">YOU APPROVE</text><text x="766" y="192" class="sub" style="fill:#d9c6a0">the exact</text><text x="766" y="208" class="sub" style="fill:#d9c6a0">package</text></g><path d="M844 149 l7 7 l-7 7" fill="none" stroke="#7a1f2b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g><rect x="862" y="92" width="140" height="128" rx="14" fill="#1c1c24" fill-opacity=".55" stroke="#2a2a33"><animate attributeName="fill-opacity" dur="10.5s" repeatCount="indefinite" values=".55;.55;1;1;.55;.55" keyTimes="0;0.7143;0.7429;0.8571;0.8671;1"/></rect>
+<text x="878" y="118" class="num">04</text>
+<text x="932" y="154" class="cmd" style="font-size:12.5px">/submit-application</text><text x="932" y="174" class="cmd" style="font-size:12.5px">/contact-recruiter</text>
+<text x="932" y="202" class="sub">browser or Gmail</text></g><path d="M1010 149 l7 7 l-7 7" fill="none" stroke="#7a1f2b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g><rect x="1028" y="92" width="140" height="128" rx="14" fill="#1c1c24" fill-opacity=".55" stroke="#2a2a33"><animate attributeName="fill-opacity" dur="10.5s" repeatCount="indefinite" values=".55;.55;1;1;.55;.55" keyTimes="0;0.8571;0.8857;1.0000;1.0000;1"/></rect>
+<text x="1044" y="118" class="num">05</text>
+<text x="1098" y="158" class="cmd">/check-updates</text><text x="1098" y="184" class="sub">replies, interviews,</text>
+<text x="1098" y="202" class="sub">one follow-up</text></g>
+<rect x="0" y="86" width="152" height="140" rx="18" fill="none" stroke="#d4a94a" stroke-width="2.5">
+<animateTransform attributeName="transform" type="translate" dur="10.5s" repeatCount="indefinite" values="26 0;26 0;192 0;192 0;358 0;358 0;524 0;524 0;690 0;690 0;856 0;856 0;1022 0;1022 0" keyTimes="0;0.1419;0.1714;0.2847;0.3143;0.4276;0.4571;0.5704;0.6;0.7133;0.7429;0.8561;0.8857;1"/>
+</rect>
+<text x="32" y="262" class="foot">/job-status and /integrations work any time: where everything stands, and what is connected.</text>
 </svg>
